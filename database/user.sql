@@ -5,6 +5,7 @@ CREATE TABLE User (
     id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR (16) NOT NULL,
     password VARCHAR (32) NOT NULL,
+    birthday DATE NOT NULL,
     
     CONSTRAINT UserConstraint UNIQUE (id),
     PRIMARY KEY (id)
