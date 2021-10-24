@@ -4,6 +4,7 @@ const bodyParser = require('koa-bodyparser');
 const http = require('http');
 
 // Load environment variables (or .env if local environment)
+// The .env file is not uploaded to github. I used the one from project 2.
 require('dotenv').config();
 app.use(bodyParser());
 require('./app/Middleware/CORS.js')(app);

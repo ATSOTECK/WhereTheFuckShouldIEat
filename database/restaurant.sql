@@ -1,3 +1,5 @@
+USE decidr;
+
 DROP TABLE IF EXISTS Restaurant;
 
 CREATE TABLE Restaurant (
@@ -8,21 +10,21 @@ CREATE TABLE Restaurant (
     lng FLOAT NOT NULL DEFAULT 0,
     updated DATE NOT NULL,
     
-    --Maybe not the best way to do it.
-    monOpen INT NOT,
-    monCLose INT NOT,
-    tueOpen INT NOT,
-    tueCLose INT NOT,
-    wedOpen INT NOT,
-    wedCLose INT NOT,
-    thuOpen INT NOT,
-    thuCLose INT NOT,
-    friOpen INT NOT,
-    friCLose INT NOT,
-    satOpen INT NOT,
-    satCLose INT NOT,
-    sunOpen INT NOT,
-    sunCLose INT NOT,
+    #Maybe not the best way to do it.
+    monOpen INT,
+    monCLose INT,
+    tueOpen INT,
+    tueCLose INT,
+    wedOpen INT,
+    wedCLose INT,
+    thuOpen INT,
+    thuCLose INT,
+    friOpen INT,
+    friCLose INT,
+    satOpen INT,
+    satCLose INT,
+    sunOpen INT,
+    sunCLose INT,
     
     priceLevel INT,
     rating INT,

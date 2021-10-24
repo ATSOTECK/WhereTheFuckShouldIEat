@@ -1,3 +1,5 @@
+USE decidr;
+
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS UserHistory;
 

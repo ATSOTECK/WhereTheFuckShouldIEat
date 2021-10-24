@@ -12,12 +12,12 @@ const VerifyJWT = require('../app/Middleware/VerifyJWT.js');
 |
 */
 const router = require('koa-router')({
-    prefix: '/api/v1'
+    prefix: '/api'
 });
 
 router.get('/', function (ctx) {
     console.log('router.get(/)');
-    return ctx.body = 'What is up?';
+    return ctx.body = 'what is up my dudes';
 });
 
 /*
@@ -36,12 +36,25 @@ const loginRouter = require('koa-router')({
 });
 loginRouter.get('/:user_id', LoginController.authorizeUser, (err) => console.log("routers.js: loginRouter error:", err));
 
+const UserController = new (require('../app/Controllers/UserController.js'))();
+const userRouter = require('koa-router')({
+    prefix: '/user'
+});
+
+userRouter.use(VerifyJWT);
+userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
+userRouter.post('/new/', async ctx => {
+    let newUser = ctx.request.body;
+    await UserController.newUser(ctx, newUser);
+});
+
 /**
  * Register all of the controllers into the default controller.
  */
 router.use(
     '',
-    loginRouter.routes()
+    loginRouter.routes(),
+    userRouter.routes()
 );
 
 module.exports = function (app) {
