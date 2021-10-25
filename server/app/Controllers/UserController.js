@@ -49,8 +49,8 @@ class UserController {
         return new Promise((resolve, reject) => {
             const query = `
                 INSERT INTO User
-                (id, username, password, firstName, lastName, birthday) VALUES
-                (?, ?, ?, ?, ?, ?)
+                (username, password, firstName, lastName, birthday) VALUES
+                (?, ?, ?, ?, ?)
             `;
             
             dbConnection.query({

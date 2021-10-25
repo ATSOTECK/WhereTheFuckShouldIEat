@@ -45,6 +45,7 @@ userRouter.use(VerifyJWT);
 userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
 userRouter.post('/new/', async ctx => {
     let newUser = ctx.request.body;
+    console.log(newUser);
     await UserController.newUser(ctx, newUser);
 });
 
