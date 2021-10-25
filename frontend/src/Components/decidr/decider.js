@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, Component} from 'react';
 import Typography from '@mui/material/Typography';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
@@ -14,8 +14,69 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
+import GoogleMapReact from 'google-map-react';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import {render} from "react-dom";
+
+
+const AnyReactComponent = ({ text }) => <div>{text}</div>;
+let lat = 38.444342620549875
+let lng = -122.7031968966762
+class SimpleMap extends Component {
+
+    componentDidMount() {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            console.log("Latitude is :", position.coords.latitude);
+            lat = position.coords.latitude
+            console.log("Longitude is :", position.coords.longitude);
+            lng = position.coords.longitude
+        });}
+    static defaultProps = {
+        center: {
+            lat,
+            lng
+        },
+        zoom: 11
+    };
+
+    /* original div
+                <div style={{ height: '50vh', width: '50%',
+                position: '', left: '50%', top: '50%',
+                transform: 'translate(-50%, -50%)',
+            }}>
+     */
+
+
+
+    render() {
+        return (
+            // Important! Always set the container height explicitly
+            <div id="gmap_canvas" style={{ height: '50vh', width: '75%',
+                marginLeft:"auto", marginRight:"auto" }}>
+                <header style={{
+                    textAlign: 'center',
+                    fontSize: '50px',
+                }}>
+                    <Typography variant="h5" align="center" color="text.secondary" paragraph>
+                        Here's where you'll see your restaraunts location
+                    </Typography>
+                </header>
+
+
+                <GoogleMapReact
+                    bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
+                    defaultCenter={this.props.center}
+                    defaultZoom={this.props.zoom}
+                >
+                </GoogleMapReact>
+
+            </div>
+        );
+    }
+}
+
+
 
 function Copyright() {
     return (
@@ -62,7 +123,7 @@ export default function decider(props) {
                                 Here's where you'll get your restaraunt
                             </Typography>
                             <Stack
-                                sx={{ pt: 4 }}
+                                sx={{ pt: 2 }}
                                 direction="row"
                                 spacing={1}
                                 justifyContent="center"
@@ -72,7 +133,7 @@ export default function decider(props) {
                             </Stack>
                         </Container>
                     </Box>
-                    <Container sx={{ py: 8 }} maxWidth="md">
+                    <Container sx={{ py: 1 }} maxWidth="md">
                         {/* End hero unit */}
                         <Grid container spacing={0}>
                             {cards.map((card) => (
@@ -99,13 +160,17 @@ export default function decider(props) {
                                         </CardContent>
                                         <CardActions>
                                             <Button variant="outlined" size="medium">Directions</Button>
-                                            <Button variant="outlined" size="medium">Favroite</Button>
+                                            <Button variant="outlined" size="medium">Favorite</Button>
                                             <Button variant="outlined" size="medium">Blacklist</Button>
                                         </CardActions>
                                     </Card>
                                 </Grid>
                             ))}
                         </Grid>
+                    </Container>
+                    <Container sx={{ py: 8 }}>
+                        <SimpleMap>
+                        </SimpleMap>
                     </Container>
                 </main>
                 {/* Footer */}
