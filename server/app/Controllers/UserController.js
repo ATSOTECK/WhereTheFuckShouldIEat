@@ -1,6 +1,7 @@
 const dbConnection = require('../../database/mySQLconnect');
 const dateFormat = require('dateformat');
 const util = require('util');
+const jwt = require("jsonwebtoken");
 
 const dbQuery = util.promisify(dbConnection.query).bind(dbConnection);
 
@@ -55,58 +56,64 @@ class UserController {
                 return reject("All info needed");
             }
             
-            (async () => {
-                await dbQuery({
-                    sql: `SELECT username FROM User WHERE username = ?`,
-                    values: [user.username]
-                }, (err, res) => {
-                    try {
-                        if (err) {
-                            console.log('Connection error in UserController::newUser()', error);
-                            ctx.body = [];
-                            ctx.status = 200;
-                            return reject(err);
-                        }
-                        
-                        if (res.length === 0) {
-                            console.log(`User ${user.username} does not exist.`);
-                        } else {
-                            console.log(`User ${user.username} already exists.`);
-                            
-                            ctx.status = 409;
-                            ctx.body = res;
-                            resolve(res);
-                        }
-                    } catch (e) {
-                        console.log(`Error: ${e}`);
-                    }
-                });
-            
-                console.log(`Adding user ${user.username}`);
-                
-                const query = `
-                    INSERT INTO User
-                    (username, password, firstName, lastName, birthday) VALUES
-                    (?, ?, ?, ?, ?)
-                `;
-                
-                await dbQuery({
-                    sql: query,
-                    values: [user.username, user.password, user.firstName, user.lastName, user.birthday]
-                }, (err, res) => {
-                    try {
-                        if (err) {
-                            reject(err);
-                        }
-                    
+            dbConnection.query({
+                sql: `SELECT username FROM User WHERE username = ?`,
+                values: [user.username]
+            }, (err, res) => {
+                try {
+                    if (err) {
+                        console.log('Connection error in UserController::newUser()', error);
+                        ctx.body = [];
                         ctx.status = 200;
+                        return reject(err);
+                    }
+                    
+                    if (res.length === 0) {
+                        console.log(`User ${user.username} does not exist.`);
+                        
+                        console.log(`Adding user ${user.username}`);
+            
+                        const query = `
+                            INSERT INTO User
+                            (username, password, firstName, lastName, birthday) VALUES
+                            (?, ?, ?, ?, ?)
+                        `;
+                        
+                        dbQuery({
+                            sql: query,
+                            values: [user.username, user.password, user.firstName, user.lastName, user.birthday]
+                        }, (err, res) => {
+                            try {
+                                if (err) {
+                                    reject(err);
+                                }
+                                
+                                const token = jwt.sign(
+                                    {userID: user.username},
+                                    process.env.JWT_KEY,
+                                    {expiresIn: "24h"}
+                                );
+                                
+                                user.token = token;
+                            
+                                ctx.status = 200;
+                                ctx.body = user;
+                                resolve(res);
+                            } catch (e) {
+                                console.log(`Error: ${e}`);
+                            }
+                        });
+                    } else {
+                        console.log(`User ${user.username} already exists.`);
+                        
+                        ctx.status = 409;
                         ctx.body = res;
                         resolve(res);
-                    } catch (e) {
-                        console.log(`Error: ${e}`);
                     }
-                });
-            })()
+                } catch (e) {
+                    console.log(`Error: ${e}`);
+                }
+            });
         });
     }
 }
