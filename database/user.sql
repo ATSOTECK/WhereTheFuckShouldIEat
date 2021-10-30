@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS User;
 CREATE TABLE User (
     id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR (64) UNIQUE NOT NULL,
-    password VARCHAR (32) NOT NULL,
+    password VARCHAR (128) NOT NULL,
     firstName VARCHAR (32) NOT NULL,
     lastName VARCHAR (32) NOT NULL,
     birthday DATE NOT NULL,

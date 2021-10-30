@@ -2,6 +2,7 @@ const dbConnection = require('../../database/mySQLconnect');
 const dateFormat = require('dateformat');
 const util = require('util');
 const jwt = require("jsonwebtoken");
+const bcrypt = require('bcryptjs');
 
 const dbQuery = util.promisify(dbConnection.query).bind(dbConnection);
 
@@ -49,6 +50,7 @@ class UserController {
     
     async newUser(ctx, user) {
         return new Promise((resolve, reject) => {
+            //Make sure all the boxes were filled out.
             if (!(user.username && user.password && user.firstName && user.lastName && user.birthday)) {
                 console.log("All information required.");
                 ctx.status = 400;
@@ -56,10 +58,11 @@ class UserController {
                 return reject("All info needed");
             }
             
+            //Check and see if the user exists already.
             dbConnection.query({
                 sql: `SELECT username FROM User WHERE username = ?`,
                 values: [user.username]
-            }, (err, res) => {
+            }, async (err, res) => {
                 try {
                     if (err) {
                         console.log('Connection error in UserController::newUser()', error);
@@ -72,7 +75,11 @@ class UserController {
                         console.log(`User ${user.username} does not exist.`);
                         
                         console.log(`Adding user ${user.username}`);
-            
+                        
+                        const encryptedPassword = await bcrypt.hash(user.password, 10);
+                        //console.log(encryptedPassword);
+                        
+                        //Add the user if it doen't exist.
                         const query = `
                             INSERT INTO User
                             (username, password, firstName, lastName, birthday) VALUES
@@ -81,7 +88,7 @@ class UserController {
                         
                         dbQuery({
                             sql: query,
-                            values: [user.username, user.password, user.firstName, user.lastName, user.birthday]
+                            values: [user.username, encryptedPassword, user.firstName, user.lastName, user.birthday]
                         }, (err, res) => {
                             try {
                                 if (err) {
