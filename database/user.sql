@@ -1,11 +1,11 @@
 USE decidr;
 
-DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS UserHistory;
+DROP TABLE IF EXISTS User;
 
 CREATE TABLE User (
     id INT NOT NULL AUTO_INCREMENT,
-    username VARCHAR (16) NOT NULL,
+    username VARCHAR (64) UNIQUE NOT NULL,
     password VARCHAR (32) NOT NULL,
     firstName VARCHAR (32) NOT NULL,
     lastName VARCHAR (32) NOT NULL,

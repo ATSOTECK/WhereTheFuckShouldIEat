@@ -12,7 +12,7 @@ require('./app/Middleware/CORS.js')(app);
 // Custom error catch for koa-jwt so that we can log the specific error message
 // when attempting to read and parse the access_token
 app.use(async (ctx, next) => {
-    console.log(ctx.request.body);
+    //console.log(ctx.request.body);
     
     return next().catch((err) => {
         if(err.status === 401) {
@@ -30,4 +30,6 @@ app.use(async (ctx, next) => {
 require('./config/routes.js')(app);
 
 const httpsServer = require('./config/ssl/ssl.js')(app.callback());
-httpsServer.listen(process.env.APP_PORT, () => console.log(`Listening on HTTPS port ${process.env.APP_PORT}`));
+httpsServer.listen(process.env.APP_PORT, () => {
+    console.log(`Listening on HTTPS port ${process.env.APP_PORT}`)
+});

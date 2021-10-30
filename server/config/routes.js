@@ -41,7 +41,7 @@ const userRouter = require('koa-router')({
     prefix: '/user'
 });
 
-userRouter.use(VerifyJWT);
+//userRouter.use(VerifyJWT);
 userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
 userRouter.post('/new/', async ctx => {
     let newUser = ctx.request.body;
