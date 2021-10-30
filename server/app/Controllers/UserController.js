@@ -100,11 +100,12 @@ class UserController {
                                     process.env.JWT_KEY,
                                     {expiresIn: "24h"}
                                 );
-                                
-                                user.token = token;
                             
                                 ctx.status = 200;
-                                ctx.body = user;
+                                ctx.body = {
+                                    status: "success",
+                                    token: token
+                                };
                                 resolve(res);
                             } catch (e) {
                                 console.log(`Error: ${e}`);
