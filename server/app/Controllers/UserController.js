@@ -48,6 +48,33 @@ class UserController {
         });
     }
     
+    async getUserPassword(user) {
+        return new Promise((resolve, reject) =>{
+            const query = `
+                        SELECT 
+                            password
+                        FROM
+                            User
+                        WHERE
+                            username = ?
+            `;
+            
+            dbConnection.query({
+                sql: query,
+                values: [user]
+            }, (error, tuples) => {
+               if (error) {
+                   console.log('Connection error in UserController::getUserPassword()', error);
+                   return reject(error);
+               }
+               
+               return resolve(tuples);
+            });
+        }).catch((err) => {
+            console.log('Database connection error', err);
+        });
+    }
+    
     async newUser(ctx, user) {
         return new Promise((resolve, reject) => {
             //Make sure all the boxes were filled out.

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useState} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -31,6 +31,8 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignIn() {
+    const [isSuccess, setIsSuccess] = useState(false);
+    
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -39,6 +41,31 @@ export default function SignIn() {
       email: data.get('email'),
       password: data.get('password'),
     });
+    
+    event.preventDefault();
+    fetch(`http://localhost:8443/api/login/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/json'
+        },
+        body: JSON.stringify({
+            username: data.get('email'),
+            password: data.get('password')
+        })
+    }).then((response) => {
+        console.log(response);
+        if (response.status === 200) {
+            response.json().then(data => console.log(data));
+            setIsSuccess(true);
+            //setTimeout(()=>{history.push('/')}, 2500);
+        } else if (response.status === 400) {
+            response.json().then(data => {
+                //setErrors(data)
+            });
+        } else {
+            throw new Error(`Unexpected response: ${response}`);
+        }
+    })
   };
 
   return (
