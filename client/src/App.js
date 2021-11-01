@@ -6,7 +6,6 @@ import Decidr from './Components/decidr.js'
 import RBL from './Components/rbl.js'
 import Login from './Components/login.js'
 import SignUp from './Components/signup.js'
-
 import Header from './Components/header.js'
 
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';

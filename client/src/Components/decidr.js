@@ -15,14 +15,16 @@ import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
 import GoogleMapReact from 'google-map-react';
-
+import 'bootstrap/dist/css/bootstrap.css';
+import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {render} from "react-dom";
-
+import ModalHeader from "react-bootstrap/ModalHeader";
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 let lat = 38.444342620549875
 let lng = -122.7031968966762
+
 class SimpleMap extends Component {
 
     componentDidMount() {
@@ -47,6 +49,11 @@ class SimpleMap extends Component {
             }}>
      */
 
+    /* goes in header
+    *                     <Typography variant="h5" align="center" color="text.secondary" paragraph>
+                        Here's where you'll see your restaraunts location
+                    </Typography>
+    *  */
 
 
     render() {
@@ -58,9 +65,6 @@ class SimpleMap extends Component {
                     textAlign: 'center',
                     fontSize: '50px',
                 }}>
-                    <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                        Here's where you'll see your restaraunts location
-                    </Typography>
                 </header>
 
 
@@ -75,8 +79,6 @@ class SimpleMap extends Component {
         );
     }
 }
-
-
 
 function Copyright() {
     return (
@@ -95,9 +97,43 @@ const cards = [1];
 
 const theme = createTheme();
 
+class Newpop extends React.Component {
+    constructor() {
+        super();
+        this.state={
+            show:false
+        }
+    }
+    handleModal() {
+        this.setState({show:!this.state.show})
+    }
+    render() {
+        return (
+            <div>
+                <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Directions</Button>
+                {/*POPUP*/}
+                <Modal show={this.state.show}>
+                    <ModalHeader>
+                        Directions:
+                    </ModalHeader>
+                    <ModalBody>
+                        <SimpleMap/>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>
+                    </ModalFooter>
+                </Modal>
+            </div>
+        );
+    }
+}
+
+
 export default function decider(props) {
     return (
         <Fragment>
+            <head>
+            </head>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <main>
@@ -159,7 +195,8 @@ export default function decider(props) {
                                             </Typography>
                                         </CardContent>
                                         <CardActions>
-                                            <Button variant="outlined" size="medium">Directions</Button>
+                                            <Newpop></Newpop>
+                                            &nbsp;&nbsp;
                                             <Button variant="outlined" size="medium">Favorite</Button>
                                             <Button variant="outlined" size="medium">Blacklist</Button>
                                         </CardActions>
@@ -169,6 +206,9 @@ export default function decider(props) {
                         </Grid>
                     </Container>
                     <Container sx={{ py: 8 }}>
+                        <Typography variant="h5" align="center" color="text.secondary" paragraph>
+                            Here's where you'll see your restaraunts location
+                        </Typography>
                         <SimpleMap>
                         </SimpleMap>
                     </Container>
@@ -186,6 +226,10 @@ export default function decider(props) {
                     </Typography>
                     <Copyright />
                 </Box>
+
+
+
+
                 {/* End footer */}
             </ThemeProvider>
         </Fragment>
