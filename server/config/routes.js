@@ -36,7 +36,7 @@ const loginRouter = require('koa-router')({
 });
 loginRouter.post('/', async ctx => {
     let user = ctx.request.body;
-    console.log(user);
+    //console.log(user);
     await LoginController.login(ctx, user);
 });
 //loginRouter.get('/:user_id', LoginController.authorizeUser, (err) => console.log("routers.js: loginRouter error:", err));
@@ -50,7 +50,7 @@ const userRouter = require('koa-router')({
 userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
 userRouter.post('/new/', async ctx => {
     let newUser = ctx.request.body;
-    console.log(newUser);
+    //console.log(newUser);
     await UserController.newUser(ctx, newUser);
 });
 
