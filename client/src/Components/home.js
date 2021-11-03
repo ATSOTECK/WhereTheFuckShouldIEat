@@ -24,19 +24,17 @@ export default function Home(props) {
                 Just pick below whether you'd like to choose based on location or youre looking for the Decidr Randomizer
             </Typography>
             <Box padding='30px'
-                 textAlign='center'>
-                <Link to='/decidr'>
-                    <Button marginRight={"10px"} variant='outlined' size={"large"}>
+                 textAlign='center'
+                 display={"list-item"}
+                 justifyContent={"space-between"}>
+                    <Button type={"submit"} formTarget="_self" href={'/#/decidr'} marginRight={"10px"} variant='outlined' size={"large"}>
                         Decidr
                     </Button>
-                </Link>
                 &nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;
-                <Link to='/rbl'>
-                    <Button margin-left={'10px'} variant='outlined' size={"large"}>
+                    <Button type={"submit"} formTarget="_self" href={'/#/rbl'} marginRight={"10px"} variant='outlined' size={"large"}>
                         By Location
                     </Button>
-                </Link>
             </Box>
         </Fragment>
     )

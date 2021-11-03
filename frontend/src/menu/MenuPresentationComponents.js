@@ -1,4 +1,4 @@
-import User from '../Components/User/User';
+import User from '../../../client/src/Components/User';
 import Decider from '../Components/decidr/decider';
 import Settings from '../Components/Settings/Settings';
 import Home from '../Components/Home/Home';

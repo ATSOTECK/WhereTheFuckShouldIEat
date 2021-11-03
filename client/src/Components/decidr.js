@@ -15,24 +15,20 @@ import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
 import GoogleMapReact from 'google-map-react';
-
+import 'bootstrap/dist/css/bootstrap.css';
+import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {render} from "react-dom";
-
+import ModalHeader from "react-bootstrap/ModalHeader";
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 let lat = 38.444342620549875
 let lng = -122.7031968966762
+
 class SimpleMap extends Component {
 
-    componentDidMount() {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            console.log("Latitude is :", position.coords.latitude);
-            lat = position.coords.latitude
-            console.log("Longitude is :", position.coords.longitude);
-            lng = position.coords.longitude
-        });}
-    static defaultProps = {
+
+    state = {
         center: {
             lat,
             lng
@@ -40,34 +36,37 @@ class SimpleMap extends Component {
         zoom: 11
     };
 
-    /* original div
-                <div style={{ height: '50vh', width: '50%',
-                position: '', left: '50%', top: '50%',
-                transform: 'translate(-50%, -50%)',
-            }}>
-     */
+    componentDidMount() {
+        navigator.geolocation.getCurrentPosition(function(location) {
+            let newLat = {
+                lat: location.coords.latitude,
+                lng: location.coords.longitude
+            };
+            this.setState({
+                center: newLat
+            })
+            console.log(newLat)
+            let radius = 999
+            let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
+            let res;
+            fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
+                .then(response => response.json())
+                .then(data => (res = data['results']))
+                .then(data => console.log(res))
+        }.bind(this));
+        // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
 
-
+    }
 
     render() {
         return (
             // Important! Always set the container height explicitly
-            <div id="gmap_canvas" style={{ height: '50vh', width: '75%',
+            <div id="gmap_canvas" style={{ height: '50vh', width: '80%',
                 marginLeft:"auto", marginRight:"auto" }}>
-                <header style={{
-                    textAlign: 'center',
-                    fontSize: '50px',
-                }}>
-                    <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                        Here's where you'll see your restaraunts location
-                    </Typography>
-                </header>
-
-
                 <GoogleMapReact
                     bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
-                    defaultCenter={this.props.center}
-                    defaultZoom={this.props.zoom}
+                    center={this.state.center}
+                    defaultZoom={this.state.zoom}
                 >
                 </GoogleMapReact>
 
@@ -75,8 +74,6 @@ class SimpleMap extends Component {
         );
     }
 }
-
-
 
 function Copyright() {
     return (
@@ -95,9 +92,43 @@ const cards = [1];
 
 const theme = createTheme();
 
+class Newpop extends React.Component {
+    constructor() {
+        super();
+        this.state={
+            show:false
+        }
+    }
+    handleModal() {
+        this.setState({show:!this.state.show})
+    }
+    render() {
+        return (
+            <div>
+                <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Directions</Button>
+                {/*POPUP*/}
+                <Modal show={this.state.show}>
+                    <ModalHeader>
+                        Directions:
+                    </ModalHeader>
+                    <ModalBody>
+                        <SimpleMap/>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>
+                    </ModalFooter>
+                </Modal>
+            </div>
+        );
+    }
+}
+
+
 export default function decider(props) {
     return (
         <Fragment>
+            <head>
+            </head>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <main>
@@ -128,7 +159,7 @@ export default function decider(props) {
                                 spacing={1}
                                 justifyContent="center"
                             >
-                                <Button variant="contained">Refresh</Button>
+                                <Button variant="outlined">Refresh</Button>
                                 <Button variant="outlined">Save Restaraunt</Button>
                             </Stack>
                         </Container>
@@ -159,7 +190,8 @@ export default function decider(props) {
                                             </Typography>
                                         </CardContent>
                                         <CardActions>
-                                            <Button variant="outlined" size="medium">Directions</Button>
+                                            <Newpop></Newpop>
+                                            &nbsp;&nbsp;
                                             <Button variant="outlined" size="medium">Favorite</Button>
                                             <Button variant="outlined" size="medium">Blacklist</Button>
                                         </CardActions>
@@ -169,6 +201,9 @@ export default function decider(props) {
                         </Grid>
                     </Container>
                     <Container sx={{ py: 8 }}>
+                        <Typography variant="h5" align="center" color="text.secondary" paragraph>
+                            Here's where you'll see your restaraunts location
+                        </Typography>
                         <SimpleMap>
                         </SimpleMap>
                     </Container>
@@ -186,6 +221,10 @@ export default function decider(props) {
                     </Typography>
                     <Copyright />
                 </Box>
+
+
+
+
                 {/* End footer */}
             </ThemeProvider>
         </Fragment>
