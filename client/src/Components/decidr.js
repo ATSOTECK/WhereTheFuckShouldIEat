@@ -27,14 +27,8 @@ let lng = -122.7031968966762
 
 class SimpleMap extends Component {
 
-    componentDidMount() {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            console.log("Latitude is :", position.coords.latitude);
-            lat = position.coords.latitude
-            console.log("Longitude is :", position.coords.longitude);
-            lng = position.coords.longitude
-        });}
-    static defaultProps = {
+
+    state = {
         center: {
             lat,
             lng
@@ -42,36 +36,37 @@ class SimpleMap extends Component {
         zoom: 11
     };
 
-    /* original div
-                <div style={{ height: '50vh', width: '50%',
-                position: '', left: '50%', top: '50%',
-                transform: 'translate(-50%, -50%)',
-            }}>
-     */
+    componentDidMount() {
+        navigator.geolocation.getCurrentPosition(function(location) {
+            let newLat = {
+                lat: location.coords.latitude,
+                lng: location.coords.longitude
+            };
+            this.setState({
+                center: newLat
+            })
+            console.log(newLat)
+            let radius = 999
+            let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
+            let res;
+            fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
+                .then(response => response.json())
+                .then(data => (res = data['results']))
+                .then(data => console.log(res))
+        }.bind(this));
+        // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
 
-    /* goes in header
-    *                     <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                        Here's where you'll see your restaraunts location
-                    </Typography>
-    *  */
-
+    }
 
     render() {
         return (
             // Important! Always set the container height explicitly
-            <div id="gmap_canvas" style={{ height: '50vh', width: '75%',
+            <div id="gmap_canvas" style={{ height: '50vh', width: '80%',
                 marginLeft:"auto", marginRight:"auto" }}>
-                <header style={{
-                    textAlign: 'center',
-                    fontSize: '50px',
-                }}>
-                </header>
-
-
                 <GoogleMapReact
                     bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
-                    defaultCenter={this.props.center}
-                    defaultZoom={this.props.zoom}
+                    center={this.state.center}
+                    defaultZoom={this.state.zoom}
                 >
                 </GoogleMapReact>
 
@@ -164,7 +159,7 @@ export default function decider(props) {
                                 spacing={1}
                                 justifyContent="center"
                             >
-                                <Button variant="contained">Refresh</Button>
+                                <Button variant="outlined">Refresh</Button>
                                 <Button variant="outlined">Save Restaraunt</Button>
                             </Stack>
                         </Container>

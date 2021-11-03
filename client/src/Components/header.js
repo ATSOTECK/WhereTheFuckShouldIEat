@@ -13,22 +13,19 @@ function Header() {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
+
                 <Toolbar>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                        <Button type={"submit"} formTarget="_self" href={'/#/User_Settings'} color={'inherit'} variant='outlined' marginRight={"100px"} size={"large"}>
+                            User Settings
+                        </Button>
+                    &nbsp;&nbsp;
+                        <Button type={"submit"} formTarget="_self" href={'/#'} color={"inherit"} variant='outlined' marginRight={"10px"} size={"large"}>
+                            Home
+                        </Button>
+                    <Typography justifyContent={"center"} color="#FFFFFF" variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         Decidr
                     </Typography>
-                    <Link to='/login'>
-                        <Button color="inherit" variant='outlined'>Login</Button>
-                    </Link>
+                        <Button type={"submit"} formTarget="_self" href={'/#/login'} variant='outlined' color={"inherit"} size={"large"}>Login</Button>
                 </Toolbar>
             </AppBar>
         </Box>

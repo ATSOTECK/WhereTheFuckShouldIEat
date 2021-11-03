@@ -7,6 +7,7 @@ import RBL from './Components/rbl.js'
 import Login from './Components/login.js'
 import SignUp from './Components/signup.js'
 import Header from './Components/header.js'
+import User from './Components/User'
 
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 
@@ -21,6 +22,7 @@ function App() {
                     <Route path='/rbl' component={RBL}/>
                     <Route path='/login' component={Login}/>
                     <Route path='/signup' component={SignUp}/>
+                    <Route path='/User_Settings' component={User}></Route>
                 </Switch>
             </div>
         </Router>
