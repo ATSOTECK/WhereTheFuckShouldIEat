@@ -27,12 +27,12 @@ export default function Home(props) {
                  textAlign='center'
                  //display={"list-item"}
                  justifyContent={"space-between"}>
-                    <Button type={"submit"} formTarget="_self" href={'/#/decidr'} marginRight={"10px"} variant='outlined' size={"large"}>
+                    <Button type={"submit"} formTarget="_self" href={'/#/decidr'} variant='outlined' size={"large"}>
                         Decidr
                     </Button>
                 &nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;
-                    <Button type={"submit"} formTarget="_self" href={'/#/rbl'} marginRight={"10px"} variant='outlined' size={"large"}>
+                    <Button type={"submit"} formTarget="_self" href={'/#/rbl'} variant='outlined' size={"large"}>
                         By Location
                     </Button>
             </Box>
