@@ -48,6 +48,45 @@ class UserController {
         });
     }
     
+    async getUserByUsername(ctx) {
+        console.log(`get user with username ${ctx.params.username}`);
+        
+        return new Promise((resolve, reject) =>{
+            const query = `
+                        SELECT 
+                            username, firstName, lastName, birthDay
+                        FROM
+                            User
+                        WHERE
+                            username = ?
+            `;
+            
+            dbConnection.query({
+                sql: query,
+                values: [ctx.params.username]
+            }, (error, res) => {
+               if (error) {
+                   console.log('Connection error in UserController::getUserByUsername()', error);
+                   ctx.body = [];
+                   ctx.status = 200;
+                   return reject(error);
+               }
+               
+               if (res.length === 0) {
+                   console.log(`could not get user for ${ctx.params.username}`);
+                   ctx.body = "not found";
+                   ctx.status = 400;
+               } else {
+                   ctx.body = res;
+                   ctx.status = 200;
+               }
+               return resolve();
+            });
+        }).catch((err) => {
+            console.log('Database connection error', err);
+        });
+    }
+    
     async getUserPassword(user) {
         return new Promise((resolve, reject) =>{
             const query = `

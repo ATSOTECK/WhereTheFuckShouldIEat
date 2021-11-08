@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -15,6 +15,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { Link as LinkTo } from 'react-router-dom';
 import { useHistory } from "react-router-dom";
+
+import AuthContext from './authContext';
 
 function Copyright(props) {
   return (
@@ -34,15 +36,12 @@ const theme = createTheme();
 export default function SignIn() {
     const [isSuccess, setIsSuccess] = useState(false);
     const history = useHistory();
+    const auth = useContext(AuthContext);
     
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
     
     event.preventDefault();
     fetch(`http://localhost:8443/api/login/`, {
@@ -54,12 +53,12 @@ export default function SignIn() {
             username: data.get('email').toLocaleLowerCase(),
             password: data.get('password')
         })
-    }).then((response) => {
+    }).then(async (response) => {
         console.log(response);
         if (response.status === 200) {
-            response.json().then(data => console.log(data));
+            const {token} = await response.json();
             setIsSuccess(true);
-            //history.push('/');
+            auth.login(token);
             setTimeout(()=>{history.push('/')}, 500);
         } else if (response.status === 400) {
             response.json().then(data => {
