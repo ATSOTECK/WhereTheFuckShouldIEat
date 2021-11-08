@@ -14,6 +14,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { Link as LinkTo } from 'react-router-dom';
+import { useHistory } from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -32,6 +33,7 @@ const theme = createTheme();
 
 export default function SignIn() {
     const [isSuccess, setIsSuccess] = useState(false);
+    const history = useHistory();
     
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -49,7 +51,7 @@ export default function SignIn() {
             'Content-Type':'application/json'
         },
         body: JSON.stringify({
-            username: data.get('email'),
+            username: data.get('email').toLocaleLowerCase(),
             password: data.get('password')
         })
     }).then((response) => {
@@ -57,7 +59,8 @@ export default function SignIn() {
         if (response.status === 200) {
             response.json().then(data => console.log(data));
             setIsSuccess(true);
-            //setTimeout(()=>{history.push('/')}, 2500);
+            //history.push('/');
+            setTimeout(()=>{history.push('/')}, 500);
         } else if (response.status === 400) {
             response.json().then(data => {
                 //setErrors(data)
