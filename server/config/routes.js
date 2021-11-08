@@ -48,6 +48,7 @@ const userRouter = require('koa-router')({
 
 //userRouter.use(VerifyJWT);
 userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
+userRouter.get('/get/:username', UserController.getUserByUsername); //TODO(Skyler): Proper auth.
 userRouter.post('/new/', async ctx => {
     let newUser = ctx.request.body;
     //console.log(newUser);
