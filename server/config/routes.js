@@ -34,7 +34,12 @@ const LoginController = new (require('../app/Controllers/LoginController.js'))()
 const loginRouter = require('koa-router')({
     prefix: '/login'
 });
-loginRouter.get('/:user_id', LoginController.authorizeUser, (err) => console.log("routers.js: loginRouter error:", err));
+loginRouter.post('/', async ctx => {
+    let user = ctx.request.body;
+    //console.log(user);
+    await LoginController.login(ctx, user);
+});
+//loginRouter.get('/:user_id', LoginController.authorizeUser, (err) => console.log("routers.js: loginRouter error:", err));
 
 const UserController = new (require('../app/Controllers/UserController.js'))();
 const userRouter = require('koa-router')({
@@ -45,7 +50,7 @@ const userRouter = require('koa-router')({
 userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
 userRouter.post('/new/', async ctx => {
     let newUser = ctx.request.body;
-    console.log(newUser);
+    //console.log(newUser);
     await UserController.newUser(ctx, newUser);
 });
 

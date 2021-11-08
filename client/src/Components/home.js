@@ -25,7 +25,7 @@ export default function Home(props) {
             </Typography>
             <Box padding='30px'
                  textAlign='center'
-                 display={"list-item"}
+                 //display={"list-item"}
                  justifyContent={"space-between"}>
                     <Button type={"submit"} formTarget="_self" href={'/#/decidr'} variant='outlined' size={"large"}>
                         Decidr
