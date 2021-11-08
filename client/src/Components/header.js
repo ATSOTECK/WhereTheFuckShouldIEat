@@ -15,11 +15,11 @@ function Header() {
             <AppBar position="static">
 
                 <Toolbar>
-                        <Button type={"submit"} formTarget="_self" href={'/#/User_Settings'} color={'inherit'} variant='outlined' marginRight={"100px"} size={"large"}>
+                        <Button type={"submit"} formTarget="_self" href={'/#/User_Settings'} color={'inherit'} variant='outlined' size={"large"}>
                             User Settings
                         </Button>
                     &nbsp;&nbsp;
-                        <Button type={"submit"} formTarget="_self" href={'/#'} color={"inherit"} variant='outlined' marginRight={"10px"} size={"large"}>
+                        <Button type={"submit"} formTarget="_self" href={'/#'} color={"inherit"} variant='outlined' size={"large"}>
                             Home
                         </Button>
                     <Typography justifyContent={"center"} color="#FFFFFF" variant="h6" component="div" sx={{ flexGrow: 1 }}>

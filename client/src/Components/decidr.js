@@ -21,9 +21,20 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {render} from "react-dom";
 import ModalHeader from "react-bootstrap/ModalHeader";
 
+
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 let lat = 38.444342620549875
 let lng = -122.7031968966762
+
+let loc;
+
+function getLoc(res) {
+    loc = res;
+    if (loc == 'undefined') {
+        loc.length = 0;
+    }
+    //console.log(loc.length)
+}
 
 class SimpleMap extends Component {
 
@@ -35,6 +46,7 @@ class SimpleMap extends Component {
         },
         zoom: 11
     };
+
 
     componentDidMount() {
         navigator.geolocation.getCurrentPosition(function(location) {
@@ -53,11 +65,10 @@ class SimpleMap extends Component {
                 .then(response => response.json())
                 .then(data => (res = data['results']))
                 .then(data => console.log(res))
+                .then(data => getLoc(res))
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
-
     }
-
     render() {
         return (
             // Important! Always set the container height explicitly
@@ -91,6 +102,103 @@ function Copyright() {
 const cards = [1];
 
 const theme = createTheme();
+
+class CardSet extends Component {
+    state = {
+        nImg: "https://media-cldnry.s-nbcnews.com/image/upload/t_fit-2000w,f_auto,q_auto:best/newscms/2020_46/1635112/nicest-taco-bell-te-main-201112.jpg",
+        name: "Taco Bell",
+        addressName: "5200 CA-1, Pacifica, CA 94044",
+        oldNums: []
+    };
+
+    getRandomInt(max) {
+        let x = this.state.oldNums
+        let num = Math.floor(Math.random() * max)
+        if (x.length === max) {
+            x = []
+            x.push(num)
+        } else if (x.length < 1) {
+            x.push(num);
+        } else if (x.includes(num)) {
+            return num = this.getRandomInt(max)
+        } else {
+            x.push(num)
+        }
+        this.setState({
+           oldNums: x
+        });
+        return num;
+    }
+
+    resetCard() {
+        if (loc.length > 0) {
+            let num = this.getRandomInt(loc.length);
+            let newState = {
+                nImg: 'https://scontent-sjc3-1.xx.fbcdn.net/v/t31.18172-8/18278252_429591350732837_1790982853994926986_o.jpg?_nc_cat=105&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=4UEw_7KeHmAAX9gg_1a&_nc_ht=scontent-sjc3-1.xx&oh=fb559f4bfbc2b5c3b253fa8a2e204580&oe=61AD7FE0',
+                name: loc[num]['name'],
+                addressName: loc[num]['vicinity'],
+            };
+            this.setState({
+                name: newState.name,
+                nImg: newState.nImg,
+                addressName: newState.addressName,
+            })
+        } else {
+            let newState = {
+                nImg: "No image",
+                name: 'There are no restaraunts in your area.',
+                addressName: 'No address'
+            };
+            this.setState({
+                    name: newState.name,
+                    nImg: newState.nImg,
+                    addressName: newState.addressName
+            })
+        }
+        console.log(this.state)
+    }
+
+    render() {
+        return (
+            <Container sx={{ py: 1 }} maxWidth="md">
+                {/* End hero unit */}
+                <Grid container spacing={0}>
+                    {cards.map((card) => (
+                        <Grid item key={card} xs={12} sm={6} md={12} justifyContent="center">
+                            <Card
+                                sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                            >
+                                <CardMedia
+                                    component="img"
+                                    sx={{
+                                        pt: '0%',
+                                    }}
+                                    image={this.state.nImg}
+                                />
+                                <CardContent sx={{ flexGrow: 1 }}>
+                                    <Typography gutterBottom variant="h5" component="h2" align="center">
+                                        {this.state.name}
+                                    </Typography>
+                                    <Typography>
+                                        {this.state.addressName}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions>
+                                    <Box justifyContent={"center"} marginLeft={'200px'}>
+                                        <Newpop/>
+                                    </Box>
+                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Favorite</Button></Box>
+                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Blacklist</Button></Box>
+                                    <Box justifyContent={"center"}><Button onClick={() => {this.resetCard()}} variant="outlined" size='medium'>Refresh</Button></Box>
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Container>
+        );
+    }
+}
 
 class Newpop extends React.Component {
     constructor() {
@@ -127,8 +235,6 @@ class Newpop extends React.Component {
 export default function decider(props) {
     return (
         <Fragment>
-            <head>
-            </head>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <main>
@@ -156,56 +262,20 @@ export default function decider(props) {
                             <Stack
                                 sx={{ pt: 2 }}
                                 direction="row"
-                                spacing={1}
+                                spacing={0}
                                 justifyContent="center"
                             >
-                                <Button variant="outlined">Refresh</Button>
-                                <Button variant="outlined">Save Restaraunt</Button>
                             </Stack>
                         </Container>
                     </Box>
-                    <Container sx={{ py: 1 }} maxWidth="md">
-                        {/* End hero unit */}
-                        <Grid container spacing={0}>
-                            {cards.map((card) => (
-                                <Grid item key={card} xs={12} sm={6} md={12} justifyContent="center">
-                                    <Card
-                                        sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-                                    >
-                                        <CardMedia
-                                            component="img"
-                                            sx={{
-                                                pt: '0%',
-                                            }}
-                                            image="https://media-cldnry.s-nbcnews.com/image/upload/t_fit-2000w,f_auto,q_auto:best/newscms/2020_46/1635112/nicest-taco-bell-te-main-201112.jpg"
-                                            alt="Taco Bell pacifica"
-                                        />
-                                        <CardContent sx={{ flexGrow: 1 }}>
-                                            <Typography gutterBottom variant="h5" component="h2" align="center">
-                                                Taco Bell in Pacifica
-                                            </Typography>
-                                            <Typography>
-                                                This is your restaraunt card. Here you can click to choose to either
-                                                get directions, favorite, or blacklist this restaraunt
-                                            </Typography>
-                                        </CardContent>
-                                        <CardActions>
-                                            <Newpop></Newpop>
-                                            &nbsp;&nbsp;
-                                            <Button variant="outlined" size="medium">Favorite</Button>
-                                            <Button variant="outlined" size="medium">Blacklist</Button>
-                                        </CardActions>
-                                    </Card>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Container>
+
+                    <CardSet/>
+
                     <Container sx={{ py: 8 }}>
                         <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                            Here's where you'll see your restaraunts location
+                            Here's your location and the restaraunts around you
                         </Typography>
-                        <SimpleMap>
-                        </SimpleMap>
+                        <SimpleMap/>
                     </Container>
                 </main>
                 {/* Footer */}
