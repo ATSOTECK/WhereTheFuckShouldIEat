@@ -1,8 +1,6 @@
 import React, {Fragment, Component} from 'react';
 import Typography from '@mui/material/Typography';
-import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
-import CameraIcon from '@mui/icons-material/PhotoCamera';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -11,29 +9,26 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
 import GoogleMapReact from 'google-map-react';
 import 'bootstrap/dist/css/bootstrap.css';
 import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import {render} from "react-dom";
 import ModalHeader from "react-bootstrap/ModalHeader";
 
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 let lat = 38.444342620549875
 let lng = -122.7031968966762
-
+let num;
 let loc;
 
 function getLoc(res) {
     loc = res;
-    if (loc == 'undefined') {
+    if (loc === 'undefined') {
         loc.length = 0;
     }
-    //console.log(loc.length)
 }
 
 class SimpleMap extends Component {
@@ -44,7 +39,7 @@ class SimpleMap extends Component {
             lat,
             lng
         },
-        zoom: 11
+        zoom: 13
     };
 
 
@@ -105,15 +100,15 @@ const theme = createTheme();
 
 class CardSet extends Component {
     state = {
-        nImg: "https://media-cldnry.s-nbcnews.com/image/upload/t_fit-2000w,f_auto,q_auto:best/newscms/2020_46/1635112/nicest-taco-bell-te-main-201112.jpg",
-        name: "Taco Bell",
-        addressName: "5200 CA-1, Pacifica, CA 94044",
+        nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
+        name: "Click Refresh To get Restaurant",
+        addressName: "The address is just one click away!",
         oldNums: []
     };
 
     getRandomInt(max) {
         let x = this.state.oldNums
-        let num = Math.floor(Math.random() * max)
+        num = Math.floor(Math.random() * max)
         if (x.length === max) {
             x = []
             x.push(num)
@@ -130,11 +125,29 @@ class CardSet extends Component {
         return num;
     }
 
-    resetCard() {
+    async getImg(num) {
+        let x
+        console.log(loc[num]['photos'])
+        if ((typeof loc[num]['photos']) === 'undefined') {
+            return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
+        }
+        await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +
+            "?photoreference=" + loc[num]['photos'][0]['photo_reference'] +
+            "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=800")
+            .then(r => r.blob())
+            .then(r => (x = r))
+        return x
+    }
+
+    async resetCard() {
         if (loc.length > 0) {
-            let num = this.getRandomInt(loc.length);
+            num = this.getRandomInt(loc.length)
+            let newImg = await this.getImg(num)
+            if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
+                newImg = URL.createObjectURL(newImg)
+            }
             let newState = {
-                nImg: 'https://scontent-sjc3-1.xx.fbcdn.net/v/t31.18172-8/18278252_429591350732837_1790982853994926986_o.jpg?_nc_cat=105&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=4UEw_7KeHmAAX9gg_1a&_nc_ht=scontent-sjc3-1.xx&oh=fb559f4bfbc2b5c3b253fa8a2e204580&oe=61AD7FE0',
+                nImg: newImg,
                 name: loc[num]['name'],
                 addressName: loc[num]['vicinity'],
             };
@@ -145,14 +158,14 @@ class CardSet extends Component {
             })
         } else {
             let newState = {
-                nImg: "No image",
-                name: 'There are no restaraunts in your area.',
+                nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
+                name: 'There are no restaurants in your area.',
                 addressName: 'No address'
             };
             this.setState({
-                    name: newState.name,
-                    nImg: newState.nImg,
-                    addressName: newState.addressName
+                name: newState.name,
+                nImg: newState.nImg,
+                addressName: newState.addressName
             })
         }
         console.log(this.state)
@@ -254,10 +267,10 @@ export default function decider(props) {
                                 color="text.primary"
                                 gutterBottom
                             >
-                                Restaraunt layout
+                                Welcome to Decidr!
                             </Typography>
                             <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                                Here's where you'll get your restaraunt
+                               Click refresh on the restaurant card and you'll get your restaurant
                             </Typography>
                             <Stack
                                 sx={{ pt: 2 }}
@@ -273,7 +286,7 @@ export default function decider(props) {
 
                     <Container sx={{ py: 8 }}>
                         <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                            Here's your location and the restaraunts around you
+                            Here's your location and the restaurants you've selected
                         </Typography>
                         <SimpleMap/>
                     </Container>
@@ -291,10 +304,6 @@ export default function decider(props) {
                     </Typography>
                     <Copyright />
                 </Box>
-
-
-
-
                 {/* End footer */}
             </ThemeProvider>
         </Fragment>

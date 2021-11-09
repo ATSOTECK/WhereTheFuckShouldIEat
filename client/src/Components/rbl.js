@@ -1,11 +1,21 @@
 import React, {Component, Fragment} from 'react';
 import Typography from '@mui/material/Typography';
 import GoogleMapReact from "google-map-react";
+import './Marker.css';
 
-
-const AnyReactComponent = ({ text }) => <div>{text}</div>;
+const Marker = ({ text }) => <div>{text}</div>;
 let lat = 38.444342620549875
 let lng = -122.7031968966762
+let pins = []
+function pinHandler(jsonArray,ctx) {
+    for(let i in jsonArray){
+        //console.log([jsonArray[i]['name'],jsonArray[i]['geometry']['location']])
+        ctx.setState({pins:[...ctx.state.pins,...[{id: i,name: jsonArray[i]['name'],lat: jsonArray[i]['geometry']['location']['lat'],lng: jsonArray[i]['geometry']['location']['lng']}]]})
+    }
+    //this.setState({pins:[...this.state.pins,...[res['name'],res['geometry']['location']]]})
+}
+
+
 class SimpleMap extends Component {
 
 
@@ -14,7 +24,8 @@ class SimpleMap extends Component {
             lat,
             lng
         },
-        zoom: 11
+        zoom: 13,
+        pins: [{name: '',lat:0,lng:0,id:999}]
     };
 
     componentDidMount() {
@@ -34,6 +45,8 @@ class SimpleMap extends Component {
                 .then(response => response.json())
                 .then(data => (res = data['results']))
                 .then(data => console.log(res))
+                .then(data=> pinHandler(res,this))
+                .then(data=> console.log(this.state))
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
 
@@ -49,6 +62,16 @@ class SimpleMap extends Component {
                     center={this.state.center}
                     defaultZoom={this.state.zoom}
                 >
+                    {console.log("Should be working?")}
+                    {this.state.pins.map(item =>
+                        <Marker
+                            id={item.id}
+                            text={item.name}
+                            lat={item.lat}
+                            lng={item.lng}
+                        />
+                    )
+                    }
                 </GoogleMapReact>
 
             </div>
