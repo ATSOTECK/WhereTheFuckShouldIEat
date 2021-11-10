@@ -8,15 +8,17 @@ import { Link } from 'react-router-dom';
 export default function Home(props) {
     return (
         <Fragment>
-            <Typography
-                component="h1"
-                variant="h2"
-                align="center"
-                color="text.primary"
-                gutterBottom
-            >
-                Welcome to Decidr Home Page!
-            </Typography>
+            <Box marginTop="24px">
+                <Typography
+                    component="h1"
+                    variant="h2"
+                    align="center"
+                    color="text.primary"
+                    gutterBottom
+                >
+                    Welcome to Decidr Home Page!
+                </Typography>
+            </Box>
             <Typography variant="h5" align="center" color="text.secondary" paragraph>
                 Decidr is designed to help you pick a place to eat depending on your location!
             </Typography>
