@@ -3,7 +3,6 @@ import Typography from '@mui/material/Typography';
 import GoogleMapReact from "google-map-react";
 import './Marker.css';
 
-const Marker = ({ text }) => <div>{text}</div>;
 let lat = 38.444342620549875
 let lng = -122.7031968966762
 let pins = []
@@ -15,7 +14,25 @@ function pinHandler(jsonArray,ctx) {
     //this.setState({pins:[...this.state.pins,...[res['name'],res['geometry']['location']]]})
 }
 
+class Marker extends Component {
 
+    state = {
+        name: "test",
+        color: "blue",
+        id: ""
+    }
+    render() {
+        return (
+            <div>
+                <div className="marker"
+                    style={{ backgroundColor: this.props.color, cursor: 'pointer'}}
+                     title={this.props.name}
+                />
+                <div className="pulse" />
+            </div>
+        );
+    }
+}
 class SimpleMap extends Component {
 
 
@@ -46,7 +63,7 @@ class SimpleMap extends Component {
                 .then(data => (res = data['results']))
                 .then(data => console.log(res))
                 .then(data=> pinHandler(res,this))
-                .then(data=> console.log(this.state))
+                //.then(data=> console.log(this.state))
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
 
@@ -62,13 +79,12 @@ class SimpleMap extends Component {
                     center={this.state.center}
                     defaultZoom={this.state.zoom}
                 >
-                    {console.log("Should be working?")}
                     {this.state.pins.map(item =>
                         <Marker
-                            id={item.id}
-                            text={item.name}
+                            name={item.name}
                             lat={item.lat}
                             lng={item.lng}
+                            color="blue"
                         />
                     )
                     }

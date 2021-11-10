@@ -18,7 +18,6 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
 
 
-const AnyReactComponent = ({ text }) => <div>{text}</div>;
 let lat = 38.444342620549875
 let lng = -122.7031968966762
 let num;
@@ -74,6 +73,18 @@ class SimpleMap extends Component {
                     center={this.state.center}
                     defaultZoom={this.state.zoom}
                 >
+                        <Marker
+                            name="My Location"
+                            lat={38.322176}
+                            lng={-122.7030528}
+                            color="red"
+                        />
+                        <Marker
+                            name="Cafe Salsa"
+                            lat={38.325781}
+                            lng={-122.705338}
+                            color="blue"
+                        />
                 </GoogleMapReact>
 
             </div>
@@ -98,6 +109,25 @@ const cards = [1];
 
 const theme = createTheme();
 
+class Marker extends Component {
+    state = {
+        name: "test",
+        color: "blue",
+        id: ""
+    }
+    render() {
+        return (
+            <div>
+                <div className="marker"
+                     style={{ backgroundColor: this.props.color, cursor: 'pointer'}}
+                     title={this.props.name}
+                />
+                <div className="pulse" />
+            </div>
+        )
+    }
+}
+
 class CardSet extends Component {
     state = {
         nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
@@ -105,6 +135,8 @@ class CardSet extends Component {
         addressName: "The address is just one click away!",
         oldNums: []
     };
+
+
 
     getRandomInt(max) {
         let x = this.state.oldNums
