@@ -2,6 +2,7 @@ import React, {useContext, Fragment} from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
 import { DataGrid } from '@mui/x-data-grid';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -41,10 +42,10 @@ const columns = [
     {
         field: 'website',
         headerName: 'Website',
-        type: 'link',
+        type: 'string',
         width: 150,
         editable: false,
-      },
+    },
     {
       field: 'rating',
       headerName: 'Rating',
@@ -76,23 +77,28 @@ export default function User(props) {
     return (
         <ThemeProvider theme={theme}>
             <Container component="main" maxWidth="md">
+            <CssBaseline />
             {
                 !auth.user ?
                 <Typography component="div" variant='h3'>
                     No user is logged in.
                 </Typography> :
+                
                 <Box
-                sx={{
-                    marginTop: 8,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'left',
-                  }}>
+                    sx={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'left',
+                        textAlign: 'left',
+                    }}
+                >
                     <Typography component="h1" variant='h5'>Email: {auth.user.username}</Typography>
                     <Typography component="h1" variant='h5'>First Name: {auth.user.firstName}</Typography>
                     <Typography component="h1" variant='h5'>Last Name: {auth.user.lastName}</Typography>
                     <Typography component="h1" variant='h5'>Birthday: {new Date(auth.user.birthDay).toLocaleDateString("en-US")}</Typography>
                     <Typography component="h1" variant='h5'>History: </Typography>
+                    <Box>
                     <div style={{ height: 400, width: '100%' }}>
                         <DataGrid
                             rows={rows}
@@ -103,10 +109,11 @@ export default function User(props) {
                             disableSelectionOnClick
                         />
                     </div>
+                    </Box>
                 </Box>
             }
             <Copyright sx={{ mt: 8, mb: 4 }} />
             </Container>
         </ThemeProvider>
-    )
+    );
 }
