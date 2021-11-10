@@ -34,27 +34,7 @@ app.get('/pics/:url', (req, res) => {
             console.log(error);
             return res.status(500).json({ type: 'error', message: error.message });
         }
-        
-        //res.contentType('application/octet-stream'); //Content type for binary data.
-        
-        //This way is so express can't add a charset to the headers.
-        //When it comes from google it has no charset so I thought that might have been the issue but that didn't fix it.
-        //From google the content-type is 'image/jpeg'
-        res.writeHeader(200, {
-            'Access-Control-Allow-Origin': '*',
-            'content-type': 'image/jpeg'
-        });
-        res.write(body);
-        res.end();//*/
-        
-        //res.contentType('image/jpeg');
-        //res.send(body);
-    });/*.pipe(fs.createWriteStream("img.jpeg"));
-    
-    res.header('Access-Control-Allow-Origin', '*');
-    res.sendFile('img.jpeg', {root: __dirname});*/
-    //I thought maybe I could just send the file after it is saved but it doesn't work, 
-    //there is a CORS issue for some reason on the client.
+    }).pipe(res);
 });
 
 const PORT = process.env.PORT || 3003;
