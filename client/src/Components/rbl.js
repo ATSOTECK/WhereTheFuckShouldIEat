@@ -51,11 +51,13 @@ class SimpleMap extends Component {
                 lat: location.coords.latitude,
                 lng: location.coords.longitude
             };
+            lat = location.coords.latitude
+            lng = location.coords.longitude
             this.setState({
                 center: newLat
             })
             console.log(newLat)
-            let radius = 999
+            let radius = 1999
             let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
             let res;
             fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
@@ -79,6 +81,7 @@ class SimpleMap extends Component {
                     center={this.state.center}
                     defaultZoom={this.state.zoom}
                 >
+                    {console.log(this.state.pins)}
                     {this.state.pins.map(item =>
                         <Marker
                             name={item.name}
@@ -88,6 +91,12 @@ class SimpleMap extends Component {
                         />
                     )
                     }
+                    <Marker
+                        name="My Location"
+                        lat={lat}
+                        lng={lng}
+                        color="red"
+                    />
                 </GoogleMapReact>
 
             </div>

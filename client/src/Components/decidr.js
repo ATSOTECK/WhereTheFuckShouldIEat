@@ -20,8 +20,17 @@ import ModalHeader from "react-bootstrap/ModalHeader";
 
 let lat = 38.444342620549875
 let lng = -122.7031968966762
-let num;
+let num = 0;
 let loc;
+
+let pins = []
+function pinHandler(jsonArray,ctx) {
+        //console.log(i)
+    console.log([jsonArray[num]['name'],jsonArray[num]['geometry']['location']])
+    ctx.setState({pins:[...ctx.state.pins,...[{id: num,name: jsonArray[num]['name'],lat: jsonArray[num]['geometry']['location']['lat'],lng: jsonArray[num]['geometry']['location']['lng']}]]})
+    //this.setState({pins:[...this.state.pins,...[res['name'],res['geometry']['location']]]})
+}
+
 
 function getLoc(res) {
     loc = res;
@@ -38,9 +47,9 @@ class SimpleMap extends Component {
             lat,
             lng
         },
-        zoom: 13
+        zoom: 13,
+        pins: [{name: '',lat:0,lng:0,id:999}]
     };
-
 
     componentDidMount() {
         navigator.geolocation.getCurrentPosition(function(location) {
@@ -48,11 +57,13 @@ class SimpleMap extends Component {
                 lat: location.coords.latitude,
                 lng: location.coords.longitude
             };
+            lat = location.coords.latitude
+            lng = location.coords.longitude
             this.setState({
                 center: newLat
             })
-            console.log(newLat)
-            let radius = 999
+            //console.log(newLat)
+            let radius = 1999
             let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
             let res;
             fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
@@ -60,8 +71,10 @@ class SimpleMap extends Component {
                 .then(data => (res = data['results']))
                 .then(data => console.log(res))
                 .then(data => getLoc(res))
+                .then(data=> pinHandler(res,this))
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
+
     }
     render() {
         return (
@@ -73,18 +86,23 @@ class SimpleMap extends Component {
                     center={this.state.center}
                     defaultZoom={this.state.zoom}
                 >
+                    {//console.log(this.state.pins[num])
+                    }
+                    {this.state.pins.map(item =>
                         <Marker
-                            name="My Location"
-                            lat={38.322176}
-                            lng={-122.7030528}
-                            color="red"
-                        />
-                        <Marker
-                            name="Cafe Salsa"
-                            lat={38.325781}
-                            lng={-122.705338}
+                            name={item.name}
+                            lat={item.lat}
+                            lng={item.lng}
                             color="blue"
                         />
+                    )
+                    }
+                    <Marker
+                            name="My Location"
+                            lat={lat}
+                            lng={lng}
+                            color="red"
+                    />
                 </GoogleMapReact>
 
             </div>
@@ -136,8 +154,6 @@ class CardSet extends Component {
         oldNums: []
     };
 
-
-
     getRandomInt(max) {
         let x = this.state.oldNums
         num = Math.floor(Math.random() * max)
@@ -165,7 +181,7 @@ class CardSet extends Component {
         }
         await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +
             "?photoreference=" + loc[num]['photos'][0]['photo_reference'] +
-            "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=800")
+            "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=1920" + "&maxheight=1080")
             .then(r => r.blob())
             .then(r => (x = r))
         return x
@@ -218,6 +234,8 @@ class CardSet extends Component {
                                     sx={{
                                         pt: '0%',
                                     }}
+                                    style={{height: 600,
+                                    width:900}}
                                     image={this.state.nImg}
                                 />
                                 <CardContent sx={{ flexGrow: 1 }}>
@@ -318,7 +336,7 @@ export default function decider(props) {
 
                     <Container sx={{ py: 8 }}>
                         <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                            Here's your location and the restaurants you've selected
+                            Here's your location and the restaurant you've selected
                         </Typography>
                         <SimpleMap/>
                     </Container>
