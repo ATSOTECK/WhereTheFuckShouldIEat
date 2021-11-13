@@ -18,37 +18,39 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
 
 
+
+const cards = [1];
+const theme = createTheme();
 let lat = 38.444342620549875
 let lng = -122.7031968966762
 let num = 0;
 let loc;
 
-let pins = []
-function pinHandler(jsonArray,ctx) {
-        //console.log(i)
-    console.log([jsonArray[num]['name'],jsonArray[num]['geometry']['location']])
-    ctx.setState({pins:[...ctx.state.pins,...[{id: num,name: jsonArray[num]['name'],lat: jsonArray[num]['geometry']['location']['lat'],lng: jsonArray[num]['geometry']['location']['lng']}]]})
-    //this.setState({pins:[...this.state.pins,...[res['name'],res['geometry']['location']]]})
-}
-
-
+//LOCATION ARRAY
 function getLoc(res) {
     loc = res;
     if (loc === 'undefined') {
         loc.length = 0;
     }
+    console.log("list of locations:\n", loc)
 }
 
+//MAP FUNCTION
 class SimpleMap extends Component {
 
-
     state = {
+        nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
+        cardName: "Click Refresh To get Restaurant",
+        addressName: "The address is just one click away!",
+        oldNums: [],
         center: {
             lat,
             lng
         },
+        color: "",
         zoom: 13,
-        pins: [{name: '',lat:0,lng:0,id:999}]
+        pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
+        refresh:0
     };
 
     componentDidMount() {
@@ -62,71 +64,198 @@ class SimpleMap extends Component {
             this.setState({
                 center: newLat
             })
-            //console.log(newLat)
+            console.log("Current Location:\n", newLat)
             let radius = 1999
             let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
             let res;
             fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
-                .then(data => console.log(res))
                 .then(data => getLoc(res))
-                .then(data=> pinHandler(res,this))
+                .then(data => this.setPins(loc))
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
-
     }
+
+    //adds Pins to pin for mapping
+    setPins(loc) {
+        let p = this.state.pins
+        if (p.length === 1) {
+            p.pop()
+            p.push({
+                name: "My Location",
+                lat:lat,lng:lng,
+                id:this.state.pins.id + 1,
+                color: "red"
+            })
+            if (loc.length > 0 && this.state.refresh > 0) {
+                p.push({
+                    name: loc[num]['name'],
+                    lat: loc[num]["geometry"]["location"]['lat'],
+                    lng: loc[num]["geometry"]["location"]['lng'],
+                    id: this.state.pins.id + 1,
+                    color: "blue"
+                })
+            }
+        } else if (p.length === 2) {
+            p.pop()
+            p.push({
+                name: loc[num]['name'],
+                lat:loc[num]["geometry"]["location"]['lat'],
+                lng:loc[num]["geometry"]["location"]['lng'],
+                id:this.state.pins.id + 1,
+                color: "blue"
+            })
+        }
+        this.setState({
+            pins: p
+        })
+    }
+
+    //ALL CARD SETTINGS NOW
+    async resetCard() {
+        if (loc.length > 0) {
+            num = this.getRandomInt(loc.length)
+            let newImg = await this.getImg(num)
+            if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
+                newImg = URL.createObjectURL(newImg)
+            }
+            let newState = {
+                nImg: newImg,
+                name: loc[num]['name'],
+                addressName: loc[num]['vicinity'],
+            };
+            this.setState({
+                cardName: newState.name,
+                nImg: newState.nImg,
+                addressName: newState.addressName,
+                refresh: this.state.refresh + 1
+            })
+        } else {
+            let newState = {
+                nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
+                name: 'There are no restaurants in your area.',
+                addressName: 'No address'
+            };
+            this.setState({
+                cardName: newState.name,
+                nImg: newState.nImg,
+                addressName: newState.addressName,
+                refresh: this.state.refresh + 1
+            })
+        }
+        this.setPins(loc)
+        console.log("Updated Card and Map State", this.state)
+    }
+
+    //GETS RANDOM NUM
+    getRandomInt(max) {
+        let x = this.state.oldNums
+        num = Math.floor(Math.random() * max)
+        if (x.length === max) {
+            x = []
+            x.push(num)
+        } else if (x.length < 1) {
+            x.push(num);
+        } else if (x.includes(num)) {
+            return num = this.getRandomInt(max)
+        } else {
+            x.push(num)
+        }
+        this.setState({
+            oldNums: x
+        });
+        return num;
+    }
+
+    //GETS RANDOM IMG
+    async getImg(num) {
+        let x
+        //console.log(loc[num]['photos'])
+        if ((typeof loc[num]['photos']) === 'undefined') {
+            return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
+        }
+        await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +
+            "?photoreference=" + loc[num]['photos'][0]['photo_reference'] +
+            // eslint-disable-next-line no-useless-concat
+            "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
+            .then(r => r.blob())
+            .then(r => (x = r))
+        return x
+    }
+
     render() {
         return (
-            // Important! Always set the container height explicitly
-            <div id="gmap_canvas" style={{ height: '50vh', width: '80%',
-                marginLeft:"auto", marginRight:"auto" }}>
-                <GoogleMapReact
-                    bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
-                    center={this.state.center}
-                    defaultZoom={this.state.zoom}
-                >
-                    {//console.log(this.state.pins[num])
-                    }
-                    {this.state.pins.map(item =>
-                        <Marker
-                            name={item.name}
-                            lat={item.lat}
-                            lng={item.lng}
-                            color="blue"
-                        />
-                    )
-                    }
-                    <Marker
-                            name="My Location"
-                            lat={lat}
-                            lng={lng}
-                            color="red"
-                    />
-                </GoogleMapReact>
-
-            </div>
+            <Box padding={'0px'} justifyContent={"center"}>
+            <Container sx={{ py: 1 }} maxWidth="md">
+                {/* End hero unit */}
+                <Grid container spacing={0}>
+                    {cards.map((card) => (
+                        <Grid item key={card} md={12} justifyContent="center">
+                            <Card
+                                sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                            >
+                                <CardMedia
+                                    component="img"
+                                    sx={{
+                                        pt: '0%',
+                                    }}
+                                    style={{height: 600,
+                                        width:900}}
+                                    image={this.state.nImg}
+                                />
+                                <CardContent sx={{ flexGrow: 1 }}>
+                                    <Typography gutterBottom variant="h5" component="h2" align="center">
+                                        {this.state.cardName}
+                                    </Typography>
+                                    <Typography>
+                                        {this.state.addressName}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions>
+                                    <Box justifyContent={"center"} marginLeft={'200px'}>
+                                        <Newpop/>
+                                    </Box>
+                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Favorite</Button></Box>
+                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Blacklist</Button></Box>
+                                    <Box justifyContent={"center"}><Button onClick={() => {this.resetCard()}} variant="outlined" size='medium'>Refresh</Button></Box>
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Container>
+                <Box padding={"50px"}>
+                    <Typography gutterBottom variant="h5" component="h2" align="center">
+                        Here's your location in red and the restaurants in blue!
+                    </Typography>
+                    <div id="gmap_canvas" style={{ height: '44vh', width: '55%',
+                        marginLeft:"auto", marginRight:"auto" }}>
+                        <GoogleMapReact
+                            yesIWantToUseGoogleMapApiInternals={true}
+                            bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
+                            center={this.state.center}
+                            defaultZoom={this.state.zoom}
+                        >
+                            {this.state.pins.map(item =>
+                                <Marker
+                                    id={item.id}
+                                    name={item.name}
+                                    lat={item.lat}
+                                    lng={item.lng}
+                                    color={item.color}
+                                />
+                            )
+                            }
+                        </GoogleMapReact>
+                    </div>
+                </Box>
+            </Box>
         );
     }
 }
 
-function Copyright() {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                WTFSIE.com
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
-
-const cards = [1];
-
-const theme = createTheme();
-
+//MAP MARKERS
 class Marker extends Component {
     state = {
         name: "test",
@@ -146,144 +275,32 @@ class Marker extends Component {
     }
 }
 
-class CardSet extends Component {
-    state = {
-        nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
-        name: "Click Refresh To get Restaurant",
-        addressName: "The address is just one click away!",
-        oldNums: []
-    };
-
-    getRandomInt(max) {
-        let x = this.state.oldNums
-        num = Math.floor(Math.random() * max)
-        if (x.length === max) {
-            x = []
-            x.push(num)
-        } else if (x.length < 1) {
-            x.push(num);
-        } else if (x.includes(num)) {
-            return num = this.getRandomInt(max)
-        } else {
-            x.push(num)
-        }
-        this.setState({
-           oldNums: x
-        });
-        return num;
-    }
-
-    async getImg(num) {
-        let x
-        console.log(loc[num]['photos'])
-        if ((typeof loc[num]['photos']) === 'undefined') {
-            return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
-        }
-        await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +
-            "?photoreference=" + loc[num]['photos'][0]['photo_reference'] +
-            "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=1920" + "&maxheight=1080")
-            .then(r => r.blob())
-            .then(r => (x = r))
-        return x
-    }
-
-    async resetCard() {
-        if (loc.length > 0) {
-            num = this.getRandomInt(loc.length)
-            let newImg = await this.getImg(num)
-            if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
-                newImg = URL.createObjectURL(newImg)
-            }
-            let newState = {
-                nImg: newImg,
-                name: loc[num]['name'],
-                addressName: loc[num]['vicinity'],
-            };
-            this.setState({
-                name: newState.name,
-                nImg: newState.nImg,
-                addressName: newState.addressName,
-            })
-        } else {
-            let newState = {
-                nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
-                name: 'There are no restaurants in your area.',
-                addressName: 'No address'
-            };
-            this.setState({
-                name: newState.name,
-                nImg: newState.nImg,
-                addressName: newState.addressName
-            })
-        }
-        console.log(this.state)
-    }
-
-    render() {
-        return (
-            <Container sx={{ py: 1 }} maxWidth="md">
-                {/* End hero unit */}
-                <Grid container spacing={0}>
-                    {cards.map((card) => (
-                        <Grid item key={card} xs={12} sm={6} md={12} justifyContent="center">
-                            <Card
-                                sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-                            >
-                                <CardMedia
-                                    component="img"
-                                    sx={{
-                                        pt: '0%',
-                                    }}
-                                    style={{height: 600,
-                                    width:900}}
-                                    image={this.state.nImg}
-                                />
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Typography gutterBottom variant="h5" component="h2" align="center">
-                                        {this.state.name}
-                                    </Typography>
-                                    <Typography>
-                                        {this.state.addressName}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Box justifyContent={"center"} marginLeft={'200px'}>
-                                        <Newpop/>
-                                    </Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Favorite</Button></Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Blacklist</Button></Box>
-                                    <Box justifyContent={"center"}><Button onClick={() => {this.resetCard()}} variant="outlined" size='medium'>Refresh</Button></Box>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            </Container>
-        );
-    }
-}
-
+//MODAL
 class Newpop extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state={
             show:false
         }
     }
+    getDirections() {
+
+    }
+
     handleModal() {
         this.setState({show:!this.state.show})
+        this.getDirections()
     }
     render() {
         return (
             <div>
-                <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Directions</Button>
+                <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Eat Here!</Button>
                 {/*POPUP*/}
                 <Modal show={this.state.show}>
                     <ModalHeader>
                         Directions:
                     </ModalHeader>
                     <ModalBody>
-                        <SimpleMap/>
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>
@@ -294,7 +311,21 @@ class Newpop extends React.Component {
     }
 }
 
+//COPYRIGHT just for fun
+function Copyright() {
+    return (
+        <Typography variant="body2" color="text.secondary" align="center">
+            {'Copyright © '}
+            <Link color="inherit" href="https://mui.com/">
+                WTFSIE.com
+            </Link>{' '}
+            {new Date().getFullYear()}
+            {'.'}
+        </Typography>
+    );
+}
 
+//Master Export
 export default function decider(props) {
     return (
         <Fragment>
@@ -305,8 +336,8 @@ export default function decider(props) {
                     <Box
                         sx={{
                             bgcolor: 'background.paper',
-                            pt: 8,
-                            pb: 6,
+                            pt: 0,
+                            pb: 0,
                         }}
                     >
                         <Container maxWidth="sm">
@@ -315,43 +346,18 @@ export default function decider(props) {
                                 variant="h2"
                                 align="center"
                                 color="text.primary"
-                                gutterBottom
                             >
                                 Welcome to Decidr!
                             </Typography>
                             <Typography variant="h5" align="center" color="text.secondary" paragraph>
                                Click refresh on the restaurant card and you'll get your restaurant
                             </Typography>
-                            <Stack
-                                sx={{ pt: 2 }}
-                                direction="row"
-                                spacing={0}
-                                justifyContent="center"
-                            >
-                            </Stack>
                         </Container>
                     </Box>
-
-                    <CardSet/>
-
-                    <Container sx={{ py: 8 }}>
-                        <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                            Here's your location and the restaurant you've selected
-                        </Typography>
-                        <SimpleMap/>
-                    </Container>
+                    <SimpleMap/>
                 </main>
                 {/* Footer */}
                 <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
-                    <Typography variant="h6" align="center" gutterBottom>
-                    </Typography>
-                    <Typography
-                        variant="subtitle1"
-                        align="center"
-                        color="text.secondary"
-                        component="p"
-                    >
-                    </Typography>
                     <Copyright />
                 </Box>
                 {/* End footer */}
