@@ -214,7 +214,9 @@ class SimpleMap extends Component {
                                 </CardContent>
                                 <CardActions>
                                     <Box justifyContent={"center"} marginLeft={'200px'}>
-                                        <Newpop/>
+                                        <Newpop
+                                            name={this.state.cardName}
+                                        />
                                     </Box>
                                     <Box justifyContent={"center"}><Button variant="outlined" size="medium">Favorite</Button></Box>
                                     <Box justifyContent={"center"}><Button variant="outlined" size="medium">Blacklist</Button></Box>
@@ -280,7 +282,8 @@ class Newpop extends React.Component {
     constructor(props) {
         super(props);
         this.state={
-            show:false
+            show:false,
+            name: ""
         }
     }
     getDirections() {
@@ -301,6 +304,7 @@ class Newpop extends React.Component {
                         Directions:
                     </ModalHeader>
                     <ModalBody>
+                        {this.props.name}
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>

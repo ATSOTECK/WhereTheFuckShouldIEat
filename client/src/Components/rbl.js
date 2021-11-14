@@ -4,7 +4,6 @@ import GoogleMapReact from "google-map-react";
 import './Marker.css';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -18,6 +17,7 @@ import Link from "@mui/material/Link";
 let lat = 38.444342620549875
 let lng = -122.7031968966762
 let loc;
+let tester;
 
 function getLoc(res) {
     loc = res;
@@ -31,10 +31,10 @@ function pinHandler(jsonArray,ctx) {
         ctx.setState({pins:
                 [...ctx.state.pins,
                     ...[{
-            id: i,
+                        id: i,
                         name: jsonArray[i]['name'],
-                        lat: jsonArray[i]['geometry']['location']['lat']
-                        ,lng: jsonArray[i]['geometry']['location']['lng']}]]})
+                        lat: jsonArray[i]['geometry']['location']['lat'],
+                        lng: jsonArray[i]['geometry']['location']['lng']}]]})
     }
 }
 
@@ -57,45 +57,6 @@ class Marker extends Component {
         );
     }
 }
-
-class Newpop extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state={
-            show:false,
-            name: ""
-        }
-    }
-    
-    getDirections() {
-
-    }
-
-    handleModal() {
-        this.setState({show:!this.state.show})
-        this.getDirections()
-    }
-    render() {
-        return (
-            <div>
-                <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Eat Here!</Button>
-                {/*POPUP*/}
-                <Modal show={this.state.show}>
-                    <ModalHeader>
-                        Directions:
-                    </ModalHeader>
-                    <ModalBody>
-                        {this.props.name}
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>
-                    </ModalFooter>
-                </Modal>
-            </div>
-        );
-    }
-}
-
 //COPYRIGHT just for fun
 function Copyright() {
     return (
@@ -122,16 +83,29 @@ class SimpleMap extends Component {
                 lng
             },
             zoom: 13,
-            pins: [{name: '', lat: 0, lng: 0, id: 999}],
+            pins: [{name: '', lat: null, lng: null, id: 999}],
             cards: [1],
             cardValues: [{
-                name: "There are no restaurants in your area",
+                name: "Finding Restaurants",
                 nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
-                address: "No restaurants :(",
+                address: "No address :(",
                 key: 0
             }],
+            click: 0,
             show: false
         };
+    }
+
+    getDirections() {
+
+    }
+
+    handleModal(n) {
+        this.setState({show:!this.state.show})
+        this.getDirections()
+        this.setState({
+            click: n
+        })
     }
 
     componentDidMount() {
@@ -162,11 +136,15 @@ class SimpleMap extends Component {
     }
 
     async addCards() {
-        if (loc.length === 0) {
-            return
-        }
         let newCards = this.state.cards
         let newVals = this.state.cardValues
+        if (loc.length === 0) {
+            newVals[0].name = "No restaurants in your area"
+            this.setState({
+                cardValues: newVals
+            })
+            return
+        }
         newVals.pop()
         console.log(newCards.length)
         for (let i in loc) {
@@ -262,9 +240,23 @@ class SimpleMap extends Component {
                                         </CardContent>
                                         <CardActions>
                                             <Box justifyContent={"center"}>
-                                                <Newpop
-                                                    name={this.state.cardValues[card-1].name}
-                                                />
+                                                <div>
+                                                    {/* eslint-disable-next-line no-restricted-globals */}
+                                                    <Button id={card-1} onClick={() => {this.handleModal(event.target.id)}} variant="outlined" size="medium">Eat Here!</Button>
+                                                    {/*POPUP*/}
+                                                    <Modal show={this.state.show}
+                                                            id={card-1}>
+                                                        <ModalHeader>
+                                                            Directions:
+                                                        </ModalHeader>
+                                                        <ModalBody>
+                                                            {this.state.cardValues[this.state.click].name}
+                                                        </ModalBody>
+                                                        <ModalFooter>
+                                                            <Button id={this.state.click} onClick={() => {this.handleModal(0)}} variant="outlined" size="medium">Close</Button>
+                                                        </ModalFooter>
+                                                    </Modal>
+                                                </div>
                                             </Box>
                                         </CardActions>
                                     </Card>
