@@ -120,7 +120,7 @@ class SimpleMap extends Component {
             let res;
             //old COR
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
-            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise";
+            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant";
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -273,20 +273,22 @@ class SimpleMap extends Component {
 export default function RBL(props) {
     return (
         <Fragment>
-            <Typography
-                component="h1"
-                variant="h2"
-                align="center"
-                color="text.primary"
-                gutterBottom
-            >
-                Here are your restaurants by location
-            </Typography>
-            <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                Here's where you'll pick your restaurant
-            </Typography>
-            <SimpleMap>
-            </SimpleMap>
+            <Box marginTop="24px">
+                <Typography
+                    component="h1"
+                    variant="h2"
+                    align="center"
+                    color="text.primary"
+                    gutterBottom
+                >
+                    Here are your restaurants by location
+                </Typography>
+                <Typography variant="h5" align="center" color="text.secondary" paragraph>
+                    Here's where you'll pick your restaurant
+                </Typography>
+                <SimpleMap>
+                </SimpleMap>
+            </Box>
         </Fragment>
     )
 }

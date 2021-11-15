@@ -69,7 +69,7 @@ class SimpleMap extends Component {
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise";
+            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant";
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -371,7 +371,7 @@ export default function decider(props) {
                 <CssBaseline />
                 <main>
                     {/* Hero unit */}
-                    <Box
+                    <Box marginTop="24px"
                         sx={{
                             bgcolor: 'background.paper',
                             pt: 0,
