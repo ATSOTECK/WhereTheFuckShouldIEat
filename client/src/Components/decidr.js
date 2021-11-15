@@ -68,11 +68,15 @@ class SimpleMap extends Component {
             let radius = 1999
             let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
             let res;
-            fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
+            //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
+            //With proxy
+            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
+            fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
                 .then(data => getLoc(res))
                 .then(data => this.setPins(loc))
+                .then(data => this.resetCard())
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
     }
@@ -175,10 +179,10 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +
-            "?photoreference=" + loc[num]['photos'][0]['photo_reference'] +
-            // eslint-disable-next-line no-useless-concat
-            "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080"
+        //Using old CORS
+        //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
+        await fetch (reqStr)
             .then(r => r.blob())
             .then(r => (x = r))
         return x
