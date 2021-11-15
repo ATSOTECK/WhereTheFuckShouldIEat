@@ -16,8 +16,15 @@ app.get('/list/:url', (req, res) => {
         url: "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + req.params.url 
     }, (error, response, body) => {
         if (error || response.statusCode !== 200) {
-            console.log(error);
-            return res.status(500).json({ type: 'error', message: error.message });
+            if (error) {
+                console.log(error);
+            }
+            
+            if (error && error.message) {
+                return res.status(500).json({ type: 'error', message: error.message });
+            } else {
+                return res.status(500).json({ type: 'error', message: "An unknown error occured." });
+            }
         }
 
         res.json(JSON.parse(body));
@@ -31,8 +38,15 @@ app.get('/pics/:url', (req, res) => {
         url: "https://maps.googleapis.com/maps/api/place/photo?photoreference=" + req.params.url 
     }, (error, response, body) => {
         if (error || response.statusCode !== 200) {
-            console.log(error);
-            return res.status(500).json({ type: 'error', message: error.message });
+            if (error) {
+                console.log(error);
+            }
+            
+            if (error && error.message) {
+                return res.status(500).json({ type: 'error', message: error.message });
+            } else {
+                return res.status(500).json({ type: 'error', message: "An unknown error occured." });
+            }
         }
     }).pipe(res);
 });
