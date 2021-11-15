@@ -23,7 +23,7 @@ const cards = [1];
 const theme = createTheme();
 let lat = 38.444342620549875
 let lng = -122.7031968966762
-let num = 0;
+let num = -1;
 let loc;
 
 //LOCATION ARRAY
@@ -40,8 +40,8 @@ class SimpleMap extends Component {
 
     state = {
         nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
-        cardName: "Click Refresh To get Restaurant",
-        addressName: "The address is just one click away!",
+        cardName: "Finding Restaurants!",
+        addressName: "Address will appear here!",
         oldNums: [],
         center: {
             lat,
@@ -179,7 +179,7 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080"
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
         //Using old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
         await fetch (reqStr)
@@ -202,7 +202,7 @@ class SimpleMap extends Component {
                                 <CardMedia
                                     component="img"
                                     sx={{
-                                        pt: '0%',
+                                        pt: '%',
                                     }}
                                     style={{height: 600,
                                         width:900}}
@@ -287,12 +287,27 @@ class Newpop extends React.Component {
         super(props);
         this.state={
             show:false,
-            name: ""
+            name: "",
+            directions: []
         }
     }
-    getDirections() {
-
+    async getDirections() {
+        let x
+        if (num === -1) {
+            return
+        }
+        //const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
+        //https://maps.googleapis.com/maps/api/directions/json?origin=Boston,MA&destination=Concord,MA&waypoints=Charlestown,MA|via:Lexington,MA
+        const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
+        console.log(reqStr)
+        //Using old CORS
+        await fetch (reqStr)
+            .then(r => r.json())
+            .then(data => console.log(data['routes'][0]['legs'][0]['steps']))
+        //console.log("d:", this.state.directions)
     }
+
+
 
     handleModal() {
         this.setState({show:!this.state.show})
@@ -305,10 +320,10 @@ class Newpop extends React.Component {
                 {/*POPUP*/}
                 <Modal show={this.state.show}>
                     <ModalHeader>
-                        Directions:
+                        Directions to: {this.props.name}
                     </ModalHeader>
                     <ModalBody>
-                        {this.props.name}
+                        {this.state.directions}
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>

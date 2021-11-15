@@ -17,7 +17,6 @@ import Link from "@mui/material/Link";
 let lat = 38.444342620549875
 let lng = -122.7031968966762
 let loc;
-let tester;
 
 function getLoc(res) {
     loc = res;
@@ -101,11 +100,8 @@ class SimpleMap extends Component {
     }
 
     handleModal(n) {
-        this.setState({show:!this.state.show})
-        this.getDirections()
-        this.setState({
-            click: n
-        })
+        this.setState({show:!this.state.show, click: n})
+        //this.getDirections()
     }
 
     componentDidMount() {
@@ -180,7 +176,7 @@ class SimpleMap extends Component {
         }
         //old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] +"&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
-        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080"
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=300" + "&maxheight=500"
         await fetch(reqStr)
             .then(r => r.blob())
             .then(r => (x = r))
@@ -215,7 +211,7 @@ class SimpleMap extends Component {
                 </GoogleMapReact>
                 <main>
                     {/* Hero unit */}
-                    <Container sx={{ py: 8 }} maxWidth="md">
+                    <Container sx={{ py: 8 }} maxWidth="lg">
                         {/* End hero unit */}
                         <Grid container spacing={4}>
                             {this.state.cards.map((card) => (
@@ -242,13 +238,11 @@ class SimpleMap extends Component {
                                             </Typography>
                                         </CardContent>
                                         <CardActions>
-                                            <Box justifyContent={"center"}>
                                                 <div>
                                                     {/* eslint-disable-next-line no-restricted-globals */}
                                                     <Button id={card-1} onClick={() => {this.handleModal(event.target.id)}} variant="outlined" size="medium">Eat Here!</Button>
                                                     {/*POPUP*/}
-                                                    <Modal show={this.state.show}
-                                                            id={card-1}>
+                                                    <Modal show={this.state.show}>
                                                         <ModalHeader>
                                                             Directions:
                                                         </ModalHeader>
@@ -256,11 +250,10 @@ class SimpleMap extends Component {
                                                             {this.state.cardValues[this.state.click].name}
                                                         </ModalBody>
                                                         <ModalFooter>
-                                                            <Button id={this.state.click} onClick={() => {this.handleModal(0)}} variant="outlined" size="medium">Close</Button>
+                                                            <Button onClick={() => {this.handleModal(this.state.click)}} variant="outlined" size="medium">Close</Button>
                                                         </ModalFooter>
                                                     </Modal>
                                                 </div>
-                                            </Box>
                                         </CardActions>
                                     </Card>
                                 </Grid>
