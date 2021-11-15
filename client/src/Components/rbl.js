@@ -147,6 +147,10 @@ class SimpleMap extends Component {
         newVals.pop()
         console.log(newCards.length)
         for (let i in loc) {
+            //set to 10 places max for demonstration purposes
+            if (i >= 10) {
+                return
+            }
             newCards.push(this.state.cards.length)
             let newImg = await this.getImg(i)
             if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
