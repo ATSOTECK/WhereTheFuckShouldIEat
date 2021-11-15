@@ -51,5 +51,5 @@ app.get('/pics/:url', (req, res) => {
     }).pipe(res);
 });
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 25565;
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
