@@ -70,7 +70,7 @@ app.get('/directions/:url', (req, res) => {
     console.log(getDateTime() + " directions req", req.params.url);
     
     request({
-        url: "https://maps.googleapis.com/maps/api/directions/json=" + req.params.url 
+        url: "https://maps.googleapis.com/maps/api/directions/json?origin=" + req.params.url 
     }, (error, response, body) => {
         if (error || response.statusCode !== 200) {
             if (error) {
