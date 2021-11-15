@@ -66,11 +66,10 @@ class SimpleMap extends Component {
             });
             console.log("Current Location:\n", newLat)
             let radius = 1999;
-            let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts';
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
+            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise";
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -122,7 +121,7 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=800"
+        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=800" + "&maxheight=800"
         console.log(reqStr);
         await fetch(reqStr)
             .then(r => r.blob())
@@ -196,7 +195,7 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
+        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=900" + "&maxheight=1080"
         //Using old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
         await fetch (reqStr)
@@ -256,7 +255,7 @@ class SimpleMap extends Component {
                         marginLeft:"auto", marginRight:"auto" }}>
                         <GoogleMapReact
                             yesIWantToUseGoogleMapApiInternals={true}
-                            bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
+                            bootstrapURLKeys={{ key: process.env.REACT_APP_API_KEY }}
                             center={this.state.center}
                             defaultZoom={this.state.zoom}
                         >
@@ -314,7 +313,7 @@ class Newpop extends React.Component {
             return
         }
         //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        const reqStr = "http://localhost:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
+        const reqStr = "http://localhost:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'];
         console.log(reqStr)
         //Using old CORS
         await fetch (reqStr)

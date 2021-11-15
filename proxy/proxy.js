@@ -3,6 +3,8 @@ const request = require('request');
 let fs = require('fs');
 
 const app = express();
+require('dotenv').config();
+const apiKey = "&key=" + process.env.API_KEY;
 
 function getDateTime() {
     let today = new Date();
@@ -28,7 +30,7 @@ app.get('/list/:url', (req, res) => {
     console.log(getDateTime() + " list req", req.params.url);
     
     request({
-        url: "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + req.params.url 
+        url: "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + req.params.url + apiKey
     }, (error, response, body) => {
         if (error || response.statusCode !== 200) {
             if (error) {
@@ -50,7 +52,7 @@ app.get('/pics/:url', (req, res) => {
     console.log(getDateTime() + " pics req", req.params.url);
     
     request({
-        url: "https://maps.googleapis.com/maps/api/place/photo?photoreference=" + req.params.url 
+        url: "https://maps.googleapis.com/maps/api/place/photo?photoreference=" + req.params.url + apiKey
     }, (error, response, body) => {
         if (error || response.statusCode !== 200) {
             if (error) {
@@ -70,7 +72,7 @@ app.get('/directions/:url', (req, res) => {
     console.log(getDateTime() + " directions req", req.params.url);
     
     request({
-        url: "https://maps.googleapis.com/maps/api/directions/json?origin=" + req.params.url 
+        url: "https://maps.googleapis.com/maps/api/directions/json?origin=" + req.params.url + apiKey
     }, (error, response, body) => {
         if (error || response.statusCode !== 200) {
             if (error) {

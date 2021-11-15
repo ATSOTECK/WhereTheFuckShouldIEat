@@ -117,11 +117,10 @@ class SimpleMap extends Component {
             })
             console.log("Current Location\n", newLat)
             let radius = 1999
-            let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
             let res;
             //old COR
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
-            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
+            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise";
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -180,7 +179,7 @@ class SimpleMap extends Component {
         }
         //old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] +"&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
-        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=300" + "&maxheight=500"
+        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=300" + "&maxheight=500"
         await fetch(reqStr)
             .then(r => r.blob())
             .then(r => (x = r))
@@ -193,7 +192,7 @@ class SimpleMap extends Component {
             <div id="gmap_canvas" style={{ height: '50vh', width: '50%',
                 marginLeft:"auto", marginRight:"auto" }}>
                 <GoogleMapReact
-                    bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
+                    bootstrapURLKeys={{ key: process.env.REACT_APP_API_KEY }}
                     center={this.state.center}
                     defaultZoom={this.state.zoom}
                 >
