@@ -32,7 +32,7 @@ function getLoc(res) {
     if (loc === 'undefined') {
         loc.length = 0;
     }
-    console.log("list of locations:\n", loc)
+    console.log("list of locations:\n", loc);
 }
 
 //MAP FUNCTION
@@ -59,26 +59,24 @@ class SimpleMap extends Component {
                 lat: location.coords.latitude,
                 lng: location.coords.longitude
             };
-            lat = location.coords.latitude
-            lng = location.coords.longitude
+            lat = location.coords.latitude;
+            lng = location.coords.longitude;
             this.setState({
                 center: newLat
-            })
+            });
             console.log("Current Location:\n", newLat)
-            let radius = 1999
-            let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
+            let radius = 1999;
+            let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts';
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            //const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
-            const reqStr = "http://localhost:3003/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
-            //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
+            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
                 .then(data => getLoc(res))
                 .then(data => this.setPins(loc))
-                .then(data => this.resetCard())
+                .then(data => this.resetCard());
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
     }
@@ -87,13 +85,13 @@ class SimpleMap extends Component {
     setPins(loc) {
         let p = this.state.pins
         if (p.length === 1) {
-            p.pop()
+            p.pop();
             p.push({
                 name: "My Location",
                 lat:lat,lng:lng,
                 id:this.state.pins.id + 1,
                 color: "red"
-            })
+            });
             if (loc.length > 0 && this.state.refresh > 0) {
                 p.push({
                     name: loc[num]['name'],
@@ -101,24 +99,21 @@ class SimpleMap extends Component {
                     lng: loc[num]["geometry"]["location"]['lng'],
                     id: this.state.pins.id + 1,
                     color: "blue"
-                })
+                });
             }
         } else if (p.length === 2) {
-            p.pop()
+            p.pop();
             p.push({
                 name: loc[num]['name'],
                 lat:loc[num]["geometry"]["location"]['lat'],
                 lng:loc[num]["geometry"]["location"]['lng'],
                 id:this.state.pins.id + 1,
                 color: "blue"
-            })
+            });
         }
         this.setState({
             pins: p
-        })
-           oldNums: x
         });
-        return num;
     }
 
     async getImg(num) {
@@ -127,11 +122,8 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://localhost:3003/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=800"
+        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=800"
         console.log(reqStr);
-        /*await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +
-            "?photoreference=" + loc[num]['photos'][0]['photo_reference'] +
-            "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=800")//*/
         await fetch(reqStr)
             .then(r => r.blob())
             .then(r => (x = r));
@@ -204,7 +196,7 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
+        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
         //Using old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
         await fetch (reqStr)
@@ -317,19 +309,17 @@ class Newpop extends React.Component {
         }
     }
     async getDirections() {
-        let x
+        let x;
         if (num === -1) {
             return
         }
-        //const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
-        //https://maps.googleapis.com/maps/api/directions/json?origin=Boston,MA&destination=Concord,MA&waypoints=Charlestown,MA|via:Lexington,MA
         //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        const reqStr = "http://108.194.253.176:25565/directions/?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
+        const reqStr = "http://localhost:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
         console.log(reqStr)
         //Using old CORS
         await fetch (reqStr)
             .then(r => r.json())
-            .then(data => console.log(data['routes'][0]['legs'][0]['steps']))
+            .then(data => console.log(data['routes'][0]['legs'][0]['steps']));
         //console.log("d:", this.state.directions)
     }
 
