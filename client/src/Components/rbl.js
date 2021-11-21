@@ -86,8 +86,8 @@ class SimpleMap extends Component {
             cards: [1],
             cardValues: [{
                 name: "Finding Restaurants",
-                nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
-                address: "No address",
+                nImg: "https://flevix.com/wp-content/uploads/2019/07/Untitled-2.gif",
+                address: "This will take a moment",
                 key: 0
             }],
             click: 0,
@@ -121,9 +121,7 @@ class SimpleMap extends Component {
             let res;
             //old COR
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
-            //const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
-            const reqStr = "http://localhost:3003/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
-            //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + )
+            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -147,11 +145,10 @@ class SimpleMap extends Component {
             return
         }
         newVals.pop()
-        console.log(newCards.length)
         for (let i in loc) {
-            //set to 10 places max for demonstration purposes
-            if (i >= 10) {
-                return
+            //set to 3 places max for demonstration purposes
+            if (i >= 3) {
+                break;
             }
             newCards.push(this.state.cards.length)
             let newImg = await this.getImg(i)
@@ -182,7 +179,7 @@ class SimpleMap extends Component {
         }
         //old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] +"&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
-        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=300" + "&maxheight=500"
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=1920" + "&maxheight=1080"
         await fetch(reqStr)
             .then(r => r.blob())
             .then(r => (x = r))
@@ -217,11 +214,14 @@ class SimpleMap extends Component {
                 </GoogleMapReact>
                 <main>
                     {/* Hero unit */}
-                    <Container sx={{ py: 8 }} maxWidth="lg">
+                    <Container sx={{ py: 4 }} maxWidth="lg">
                         {/* End hero unit */}
-                        <Grid container spacing={4}>
+                        <Typography gutterBottom variant="h5" component="h2">
+                            Here are your Restaurants!
+                        </Typography>
+                        <Grid container spacing={2}>
                             {this.state.cards.map((card) => (
-                                <Grid item key={card} xs={12} sm={6} md={4}>
+                                <Grid item key={card} sm={4}>
                                     <Card
                                         sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                                     >
@@ -229,10 +229,10 @@ class SimpleMap extends Component {
                                             component="img"
                                             sx={{
                                                 // 16:9
-                                                pt: '10%',
+                                                pt: '%',
                                             }}
-                                            style={{height: 500,
-                                                width:300}}
+                                            style={{height: 600,
+                                                width:350}}
                                             image={this.state.cardValues[card-1].nImg}
                                         />
                                         <CardContent sx={{ flexGrow: 1 }}>
@@ -243,17 +243,16 @@ class SimpleMap extends Component {
                                                 {this.state.cardValues[card-1].address}
                                             </Typography>
                                         </CardContent>
-                                        <CardActions>
+                                        <CardActions >
                                                 <div>
                                                     {/* eslint-disable-next-line no-restricted-globals */}
                                                     <Button id={card-1} onClick={() => {this.handleModal(event.target.id)}} variant="outlined" size="medium">Eat Here!</Button>
                                                     {/*POPUP*/}
                                                     <Modal show={this.state.show}>
                                                         <ModalHeader>
-                                                            Directions:
+                                                            Directions to: {this.state.cardValues[this.state.click].name}
                                                         </ModalHeader>
                                                         <ModalBody>
-                                                            {this.state.cardValues[this.state.click].name}
                                                         </ModalBody>
                                                         <ModalFooter>
                                                             <Button onClick={() => {this.handleModal(this.state.click)}} variant="outlined" size="medium">Close</Button>
