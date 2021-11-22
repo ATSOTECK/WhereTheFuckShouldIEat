@@ -304,12 +304,20 @@ class UserController {
                     return reject(error);
                 }
                 
-                let restaurants = res.map(async (hist) => {
-                    return await RestaurantController.getRestaurantByID(hist.restaurantID);
+                let restaurants = await res.map(async (hist) => {
+                    return await RestaurantController.getRestaurantByID(hist.restaurantID).then((data) => {
+                        return data;
+                    });
                 });
                 
-                console.log('restaurants', restaurants);
-                resolve(restaurants);
+                setTimeout(() => {
+                    ctx.status = 200;
+                    Promise.all(restaurants).then((values) => {
+                        ctx.body = values;
+                        return values;
+                    });
+                    resolve();
+                }, 10);
             });
         });
     }

@@ -380,11 +380,15 @@ class Newpop extends React.Component {
             }
         });
         
-        await fetch(`http://localhost:25566/api/user/history/${username}`)
-            .then(responce => responce.json())
-            .then((data) => {
-                console.log(data);
-            });
+        let list = await fetch(`http://localhost:25566/api/user/history/${username}`)
+        .then((response) => response.json())
+        .then((data) => {return data});
+        console.log("list", list);
+        /*
+        list.map((item) => {
+            console.log(item);
+        });
+        */
     }
 
 

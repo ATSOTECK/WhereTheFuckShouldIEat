@@ -9,8 +9,8 @@ CREATE TABLE Restaurant (
     place_id VARCHAR (64) NOT NULL,
     name VARCHAR (64) NOT NULL,
     #category VARCHAR (32) NOT NULL,
-    lat FLOAT NOT NULL DEFAULT 0,
-    lng FLOAT NOT NULL DEFAULT 0,
+    lat DOUBLE PRECISION (16, 12) NOT NULL DEFAULT 0,
+    lng DOUBLE PRECISION (16, 12) NOT NULL DEFAULT 0,
     updated DATE,
     
     #Maybe not the best way to do it.
