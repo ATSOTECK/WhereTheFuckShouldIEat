@@ -55,13 +55,23 @@ userRouter.post('/new/', async ctx => {
     await UserController.newUser(ctx, newUser);
 });
 
+const RestaurantController = new (require('../app/Controllers/RestaurantController.js'))();
+const restaurantRouter = require('koa-router')({
+    prefix: '/restaurant'
+});
+restaurantRouter.post('/new/', async ctx => {
+    let restaurant = ctx.request.body;
+    await RestaurantController.newRestaurant(ctx, restaurant);
+})
+
 /**
  * Register all of the controllers into the default controller.
  */
 router.use(
     '',
     loginRouter.routes(),
-    userRouter.routes()
+    userRouter.routes(),
+    restaurantRouter.routes()
 );
 
 module.exports = function (app) {

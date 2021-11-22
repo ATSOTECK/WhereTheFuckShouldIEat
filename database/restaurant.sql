@@ -1,14 +1,17 @@
 USE decidr;
 
+DROP TABLE IF EXISTS UserHistory;
+DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Restaurant;
 
 CREATE TABLE Restaurant (
     id INT NOT NULL AUTO_INCREMENT,
+    place_id VARCHAR (64) NOT NULL,
     name VARCHAR (64) NOT NULL,
-    category VARCHAR (32) NOT NULL,
+    #category VARCHAR (32) NOT NULL,
     lat FLOAT NOT NULL DEFAULT 0,
     lng FLOAT NOT NULL DEFAULT 0,
-    updated DATE NOT NULL,
+    updated DATE,
     
     #Maybe not the best way to do it.
     monOpen INT,

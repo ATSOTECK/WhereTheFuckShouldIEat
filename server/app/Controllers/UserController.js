@@ -190,6 +190,10 @@ class UserController {
             });
         });
     }
+    
+    async addToHistory(ctx) {
+        console.log(`Adding ${ctx.params.name} to ${ctx.params.username}'s history.'`);
+    }
 }
 
 module.exports = UserController;

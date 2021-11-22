@@ -24,7 +24,7 @@ class LoginController {
             }, async (err, res) => {
                 try {
                     if (err) {
-                        console.log('Connection error in UserController::newUser()', error);
+                        console.log('Connection error in LoginController::newUser()', error);
                         ctx.body = [];
                         ctx.status = 200;
                         return reject(err);

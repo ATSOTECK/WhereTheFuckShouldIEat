@@ -17,7 +17,9 @@ import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
 
-
+import{useContext} from 'react';
+import AuthContext from './authContext';
+let auth;
 
 const cards = [1];
 const theme = createTheme();
@@ -33,6 +35,13 @@ function getLoc(res) {
         loc.length = 0;
     }
     console.log("list of locations:\n", loc);
+}
+
+function IHateReact() {
+    auth = useContext(AuthContext);
+    return (
+        <Fragment></Fragment>
+    );
 }
 
 //MAP FUNCTION
@@ -69,7 +78,7 @@ class SimpleMap extends Component {
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://localhost:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant";
+            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant";
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -121,7 +130,7 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=800" + "&maxheight=800"
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=800" + "&maxheight=800"
         console.log(reqStr);
         await fetch(reqStr)
             .then(r => r.blob())
@@ -195,7 +204,7 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://localhost:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=900" + "&maxheight=1080"
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=900" + "&maxheight=1080"
         //Using old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
         await fetch (reqStr)
@@ -313,7 +322,7 @@ class Newpop extends React.Component {
             return
         }
         //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        const reqStr = "http://localhost:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'];
+        const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'];
         console.log(reqStr)
         //Using old CORS
         await fetch (reqStr)
@@ -321,12 +330,45 @@ class Newpop extends React.Component {
             .then(data => console.log(data['routes'][0]['legs'][0]['steps']));
         //console.log("d:", this.state.directions)
     }
-
+    
+    async addToHistory() {
+        console.log(loc[num]);
+        //IHateReact();
+        
+        /*if (auth.user) {
+            console.log(auth.user);
+        }*/
+        
+        const restaurant = loc[num];
+        
+        fetch(`http://localhost:25566/api/restaurant/new/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                place_id: restaurant.place_id,
+                name: restaurant.name,
+                lat: restaurant.geometry.location.lat,
+                lng: restaurant.geometry.location.lng
+            })
+        }).then(async (response) => {
+            console.log(response);
+            if (response.status === 200) {
+                console.log(response.json());
+            } else if (response.status === 409) {
+                console.log('Restaurant already existed.');
+            } else {
+                throw new Error(`Unexpected response: ${response}`);
+            }
+        })
+    }
 
 
     handleModal() {
-        this.setState({show:!this.state.show})
-        this.getDirections()
+        this.setState({show:!this.state.show});
+        this.getDirections();
+        this.addToHistory();
     }
     render() {
         return (

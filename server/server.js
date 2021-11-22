@@ -26,7 +26,6 @@ app.use(async (ctx, next) => {
     });
 });
 
-// require('./config/courses_routes.js')(app);
 require('./config/routes.js')(app);
 
 const httpsServer = require('./config/ssl/ssl.js')(app.callback());

@@ -23,7 +23,7 @@ function App() {
         localStorage.setItem('token', token);
         
         const getByusername = () => {
-            fetch(`http://localhost:8443/api/user/get/${username}`)
+            fetch(`http://localhost:25566/api/user/get/${username}`)
             .then(responce => responce.json())
             .then((data) => {
                 const user = {
