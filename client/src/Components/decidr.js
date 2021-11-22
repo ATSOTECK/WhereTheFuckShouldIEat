@@ -16,6 +16,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
+import ReactHtmlParser from 'react-html-parser';
 
 
 
@@ -50,7 +51,8 @@ class SimpleMap extends Component {
         color: "",
         zoom: 13,
         pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
-        refresh:0
+        refresh: 0,
+        directions: []
     };
 
     componentDidMount() {
@@ -241,7 +243,7 @@ class SimpleMap extends Component {
                     <Typography gutterBottom variant="h5" component="h2" align="center">
                         Here's your location in red and the restaurants in blue!
                     </Typography>
-                    <div id="gmap_canvas" style={{ height: '44vh', width: '55%',
+                    <div id="gmap_canvas" style={{ height: '50vh', width: '55%',
                         marginLeft:"auto", marginRight:"auto" }}>
                         <GoogleMapReact
                             yesIWantToUseGoogleMapApiInternals={true}
@@ -294,30 +296,58 @@ class Newpop extends React.Component {
         this.state={
             show:false,
             name: "",
-            directions: []
+            directions: [],
+            directionsWord: []
         }
     }
     async getDirections() {
-        let x
+        let x = []
         if (num === -1) {
             return
         }
-        //https://maps.googleapis.com/maps/api/directions/json?origin=Boston,MA&destination=Concord,MA&waypoints=Charlestown,MA|via:Lexington,MA
+        //OLD CORS
         //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        const reqStr = "http://108.194.253.176:25565/directions/?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        console.log(reqStr)
-        //Using old CORS
-        await fetch (reqStr)
+        const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
+        //console.log(reqStr)
+        await fetch(reqStr)
             .then(r => r.json())
-            .then(data => console.log(data['routes'][0]['legs'][0]['steps']))
-        //console.log("d:", this.state.directions)
+            .then(data => (x = data['routes'][0]['legs'][0]['steps']))
+            //.then(data => console.log(x))
+            .then(data => this.setState({ directions: x}))
+            .then(data => console.log(this.state.directions))
+            //.then(data => this.setDir(x))
+    }
+
+    setDir(x) {
+        let dir = []
+        console.log(x)
+        for (let i in x) {
+            console.log(x[i]['maneuver'])
+            switch (x[i]['maneuver']) {
+                case('undefined'):
+                    dir.push(" for ")
+                    break;
+                default: {
+                    dir.push(" in ")
+                }
+            }
+        }
+        this.setState({
+            directions: x,
+            directionsWord: dir
+        })
+        console.log("d", this.state.directions)
     }
 
 
 
     handleModal() {
         this.setState({show:!this.state.show})
-        this.getDirections()
+        if (!this.state.show) {
+            this.getDirections()
+        } else {
+            this.setState({directions: []})
+        }
     }
     render() {
         return (
@@ -329,7 +359,12 @@ class Newpop extends React.Component {
                         Directions to: {this.props.name}
                     </ModalHeader>
                     <ModalBody>
-                        {this.state.directions}
+                        {this.state.directions.map(item =>
+                                <Box padding={'10px'}>
+                                    {ReactHtmlParser(item["html_instructions"] + " in " + item['distance']['text'])}
+                                </Box>
+                            // + this.state.directionsWord[item] + this.state.directions[item]['distance']['text']
+                        )}
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>

@@ -13,6 +13,7 @@ import CardMedia from "@mui/material/CardMedia";
 import {Modal, ModalBody, ModalFooter} from "react-bootstrap";
 import ModalHeader from "react-bootstrap/ModalHeader";
 import Link from "@mui/material/Link";
+import ReactHtmlParser from "react-html-parser";
 
 let lat = 38.444342620549875
 let lng = -122.7031968966762
@@ -91,17 +92,35 @@ class SimpleMap extends Component {
                 key: 0
             }],
             click: 0,
-            show: false
+            show: false,
+            directions: []
         };
     }
 
-    getDirections() {
-
+    async getDirections() {
+        let x = []
+        if (loc.length <= 0) {
+            return
+        }
+        //OLD CORS
+        //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
+        const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[this.state.click]["geometry"]["location"]['lat'] + "," + loc[this.state.click]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
+        //console.log(reqStr)
+        await fetch(reqStr)
+            .then(r => r.json())
+            .then(data => (x = data['routes'][0]['legs'][0]['steps']))
+            //.then(data => console.log(x))
+            .then(data => this.setState({ directions: x}))
+            .then(data => console.log(this.state.directions))
     }
 
     handleModal(n) {
         this.setState({show:!this.state.show, click: n})
-        //this.getDirections()
+        if (!this.state.show) {
+            this.getDirections()
+        } else {
+            this.setState({directions: []})
+        }
     }
 
     componentDidMount() {
@@ -232,7 +251,7 @@ class SimpleMap extends Component {
                                                 pt: '%',
                                             }}
                                             style={{height: 600,
-                                                width:350}}
+                                                width:315}}
                                             image={this.state.cardValues[card-1].nImg}
                                         />
                                         <CardContent sx={{ flexGrow: 1 }}>
@@ -253,6 +272,12 @@ class SimpleMap extends Component {
                                                             Directions to: {this.state.cardValues[this.state.click].name}
                                                         </ModalHeader>
                                                         <ModalBody>
+                                                            {this.state.directions.map(item =>
+                                                                    <Box padding={'10px'}>
+                                                                        {ReactHtmlParser(item["html_instructions"] + " in " + item['distance']['text'])}
+                                                                    </Box>
+                                                                // + this.state.directionsWord[item] + this.state.directions[item]['distance']['text']
+                                                            )}
                                                         </ModalBody>
                                                         <ModalFooter>
                                                             <Button onClick={() => {this.handleModal(this.state.click)}} variant="outlined" size="medium">Close</Button>
