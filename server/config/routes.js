@@ -49,10 +49,16 @@ const userRouter = require('koa-router')({
 //userRouter.use(VerifyJWT);
 userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
 userRouter.get('/get/:username', UserController.getUserByUsername); //TODO(Skyler): Proper auth.
+userRouter.get('/history/:username', async (ctx) => {
+    await UserController.getFromUserHistory(ctx);
+});
 userRouter.post('/new/', async ctx => {
     let newUser = ctx.request.body;
-    //console.log(newUser);
     await UserController.newUser(ctx, newUser);
+});
+userRouter.post('/addToHistory/', async ctx => {
+    let toAdd = ctx.request.body;
+    await UserController.addToHistory(ctx, toAdd);
 });
 
 const RestaurantController = new (require('../app/Controllers/RestaurantController.js'))();

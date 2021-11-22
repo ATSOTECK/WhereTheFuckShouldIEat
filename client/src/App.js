@@ -15,6 +15,12 @@ import { LocalLaundryService } from '@mui/icons-material';
 
 import AuthContext from './Components/authContext';
 
+function clearCookie(name, domain, path){
+    var domain = domain || document.domain;
+    var path = path || "/";
+    document.cookie = name + "=; expires=" + +new Date + "; domain=" + domain + "; path=" + path;
+};
+
 function App() {
     const [user, setUser] = useState(null);
     
@@ -36,6 +42,8 @@ function App() {
                 setUser(user);
                 return user;
             });
+            
+            document.cookie = `username=${username}`;
         };
         
         return getByusername();
@@ -44,6 +52,8 @@ function App() {
     const logout = () => {
         localStorage.removeItem('token');
         setUser(null);
+        clearCookie('username', null, null);
+        console.log(`logout ${document.cookie}`);
     }
     
     const auth = {

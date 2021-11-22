@@ -21,7 +21,7 @@ app.use(async (ctx, next) => {
             ctx.body = 'JWT Token expired. If this was an app in production, you do not want to tell the public why their request was rejected!';
         } else {
             console.log('server.js: one of the modules in the chain fired an exception.');
-            console.log(`The error message is ${err}`);
+            console.log(`The error message is '${err}' with status '${err.status}'`);
         }
     });
 });

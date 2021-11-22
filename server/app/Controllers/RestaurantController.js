@@ -1,5 +1,6 @@
 const dbConnection = require('../../database/mySQLconnect');
 const util = require('util');
+const { resolve } = require('path');
 
 const dbQuery = util.promisify(dbConnection.query).bind(dbConnection);
 
@@ -72,6 +73,49 @@ class RestaurantController {
                     console.log(`Error: ${e}`);
                 }
             });
+        });
+    }
+    
+    //Meant to be called internally by the server.
+    async getRestaurantID(place_id) {
+        console.log(`Getting restaurantID for ${place_id}`);
+        return new Promise((resolve, reject) => {
+            const query = `SELECT id FROM Restaurant WHERE place_id = ?`;
+            
+            dbConnection.query({
+                sql: query,
+                values: [place_id]
+            }, (error, tuples) => {
+                if (error) {
+                    console.log('Connection error in RestaurantController::getRestaurantID()', error);
+                    return reject(error);
+                }
+                
+                return resolve(tuples[0].id);
+            });
+        }).catch((err) => {
+            console.log('Database connection error', err);
+        });
+    }
+    
+    async getRestaurantByID(rID) {
+        console.log(`Getting restaurant for ${rID}`);
+        return new Promise((resolve, reject) => {
+            const query = `SELECT place_id, name, lat, lng FROM Restaurant WHERE id = ?`;
+            
+            dbConnection.query({
+                sql: query,
+                values: [rID]
+            }, (error, tuples) => {
+                if (error) {
+                    console.log('Connection error in RestaurantController::getRestaurantByID()', error);
+                    return reject(error);
+                }
+                
+                return resolve(tuples[0]);
+            });
+        }).catch((err) => {
+            console.log('Database connection error', err);
         });
     }
 }

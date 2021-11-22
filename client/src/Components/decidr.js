@@ -332,16 +332,13 @@ class Newpop extends React.Component {
     }
     
     async addToHistory() {
-        console.log(loc[num]);
-        //IHateReact();
-        
-        /*if (auth.user) {
-            console.log(auth.user);
-        }*/
-        
         const restaurant = loc[num];
+        const username = document.cookie.split('=')[1];
+        console.log(`Add to hist ${username} : ${restaurant.place_id}`);
         
-        fetch(`http://localhost:25566/api/restaurant/new/`, {
+        console.log(loc[num]);
+        
+        await fetch(`http://localhost:25566/api/restaurant/new/`, {
             method: 'POST',
             headers: {
                 'Content-Type':'application/json'
@@ -361,13 +358,39 @@ class Newpop extends React.Component {
             } else {
                 throw new Error(`Unexpected response: ${response}`);
             }
-        })
+        });
+        
+        await fetch(`http://localhost:25566/api/user/addToHistory/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                place_id: restaurant.place_id
+            })
+        }).then(async (response) => {
+            console.log(response);
+            if (response.status === 200 || response.status === 404) {
+                console.log(response.json());
+            } else if (response.status === 409) {
+                console.log('Restaurant already in user history.');
+            } else {
+                throw new Error(`Unexpected response: ${response}`);
+            }
+        });
+        
+        await fetch(`http://localhost:25566/api/user/history/${username}`)
+            .then(responce => responce.json())
+            .then((data) => {
+                console.log(data);
+            });
     }
 
 
     handleModal() {
         this.setState({show:!this.state.show});
-        this.getDirections();
+        //this.getDirections();
         this.addToHistory();
     }
     render() {
