@@ -166,9 +166,9 @@ class SimpleMap extends Component {
         newVals.pop()
         for (let i in loc) {
             //set to 3 places max for demonstration purposes
-            if (i >= 3) {
+           /* if (i >= 3) {
                 break;
-            }
+            } */
             newCards.push(this.state.cards.length)
             let newImg = await this.getImg(i)
             if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
@@ -251,7 +251,7 @@ class SimpleMap extends Component {
                                                 pt: '%',
                                             }}
                                             style={{height: 600,
-                                                width:315}}
+                                                width:300}}
                                             image={this.state.cardValues[card-1].nImg}
                                         />
                                         <CardContent sx={{ flexGrow: 1 }}>

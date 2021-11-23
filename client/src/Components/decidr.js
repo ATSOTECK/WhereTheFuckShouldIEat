@@ -1,4 +1,4 @@
-import React, {Fragment, Component} from 'react';
+import React, {Fragment, Component, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -17,6 +17,7 @@ import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
 import ReactHtmlParser from 'react-html-parser';
+import Slider from '@mui/material/Slider';
 
 
 
@@ -52,7 +53,8 @@ class SimpleMap extends Component {
         zoom: 13,
         pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
         refresh: 0,
-        directions: []
+        directions: [],
+        value: 0
     };
 
     componentDidMount() {
@@ -198,7 +200,22 @@ class SimpleMap extends Component {
 
     render() {
         return (
-            <Box padding={'0px'} justifyContent={"center"}>
+            <Box padding={'0px'} justifyContent="center">
+                    <Box padding={"10px"} alignItems="center" marginLeft="auto" marginRight="auto" width={500} justifyContent="center">
+                    <Typography variant="h6" align="center" color="text.secondary" paragraph>
+                               Radius in Miles
+                            </Typography>
+                        <Slider
+                            defaultValue={1}
+                            aria-label="Default"
+                            justifyContent="center"
+                            step={0.1}
+                            min={1.0}
+                            max={5.0}
+                            valueLabelDisplay="auto"
+                        />
+                        <Box justifyContent={"center"}><Button variant="outlined" size="medium">Start Search</Button></Box>
+                    </Box>
             <Container sx={{ py: 1 }} maxWidth="md">
                 {/* End hero unit */}
                 <Grid container spacing={0}>
@@ -317,29 +334,6 @@ class Newpop extends React.Component {
             .then(data => console.log(this.state.directions))
             //.then(data => this.setDir(x))
     }
-
-    setDir(x) {
-        let dir = []
-        console.log(x)
-        for (let i in x) {
-            console.log(x[i]['maneuver'])
-            switch (x[i]['maneuver']) {
-                case('undefined'):
-                    dir.push(" for ")
-                    break;
-                default: {
-                    dir.push(" in ")
-                }
-            }
-        }
-        this.setState({
-            directions: x,
-            directionsWord: dir
-        })
-        console.log("d", this.state.directions)
-    }
-
-
 
     handleModal() {
         this.setState({show:!this.state.show})
