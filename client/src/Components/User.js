@@ -111,10 +111,18 @@ class HistoryCards extends Component {
             if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
                 newImg = URL.createObjectURL(newImg);
             }
+            
+            let added = new Date(loc[i].dateAdded);
+            let dd = String(added.getDate()).padStart(2, '0');
+            let mm = String(added.getMonth() + 1).padStart(2, '0'); //January is 0!
+            let yyyy = added.getFullYear();
+            added = mm + '/' + dd + '/' + yyyy;
+            
             newVals.push({
                 name: loc[i]["name"],
                 nImg: newImg,
                 address: loc[i].address,
+                dateAdded: added,
                 key: newCards.length
             })
         }
@@ -172,6 +180,9 @@ class HistoryCards extends Component {
                                             </Typography>
                                             <Typography variant="caption" component="h5">
                                                 {this.state.cardValues[card-1].address}
+                                            </Typography>
+                                            <Typography variant="caption" component="h5">
+                                                Last visited on {this.state.cardValues[card-1].dateAdded}
                                             </Typography>
                                         </CardContent>
                                         <CardActions>

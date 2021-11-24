@@ -313,6 +313,11 @@ class UserController {
                 
                 let restaurants = await res.map(async (hist) => {
                     return await RestaurantController.getRestaurantByID(hist.restaurantID).then((data) => {
+                        data = {
+                            dateAdded: hist.dateAdded,
+                            ...data
+                        }
+                        
                         return data;
                     });
                 });
