@@ -93,7 +93,8 @@ class SimpleMap extends Component {
             }],
             click: 0,
             show: false,
-            directions: []
+            directions: [],
+            radius: 1609
         };
     }
 
@@ -135,12 +136,15 @@ class SimpleMap extends Component {
                 center: newLat
             })
             console.log("Current Location\n", newLat)
-            let radius = 1999
             let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
+            if (this.props["value"] !== 'undefined') {
+                this.setState({radius: this.props["value"]*1609})
+            }
+            console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius)
             let res;
             //old COR
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
-            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key
+            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant&keyword=cruise&key=" + key
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -298,6 +302,7 @@ class SimpleMap extends Component {
 
 
 export default function RBL(props) {
+    let parent = props.location.state
     return (
         <Fragment>
             <Typography
@@ -312,8 +317,7 @@ export default function RBL(props) {
             <Typography variant="h5" align="center" color="text.secondary" paragraph>
                 Here's where you'll pick your restaurant
             </Typography>
-            <SimpleMap>
-            </SimpleMap>
+            <SimpleMap {...parent}/>
         </Fragment>
     )
 }

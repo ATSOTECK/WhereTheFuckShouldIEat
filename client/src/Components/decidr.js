@@ -17,7 +17,6 @@ import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
 import ReactHtmlParser from 'react-html-parser';
-import Slider from '@mui/material/Slider';
 
 
 
@@ -39,6 +38,10 @@ function getLoc(res) {
 
 //MAP FUNCTION
 class SimpleMap extends Component {
+    constructor(props) {
+        super(props);
+        //console.log("radius in meters = ", props["value"] * 1609)
+    }
 
     state = {
         nImg: "https://flevix.com/wp-content/uploads/2019/07/Untitled-2.gif",
@@ -54,7 +57,7 @@ class SimpleMap extends Component {
         pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
         refresh: 0,
         directions: [],
-        value: 0
+        radius: 1609
     };
 
     componentDidMount() {
@@ -69,12 +72,15 @@ class SimpleMap extends Component {
                 center: newLat
             })
             console.log("Current Location:\n", newLat)
-            let radius = 1999
             let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
+            if (this.props["value"] !== 'undefined') {
+                this.setState({radius: this.props["value"]*1609})
+            }
+            console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius)
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key
+            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant&keyword=cruise&key=" + key
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -201,21 +207,6 @@ class SimpleMap extends Component {
     render() {
         return (
             <Box padding={'0px'} justifyContent="center">
-                    <Box padding={"10px"} alignItems="center" marginLeft="auto" marginRight="auto" width={500} justifyContent="center">
-                    <Typography variant="h6" align="center" color="text.secondary" paragraph>
-                               Radius in Miles
-                            </Typography>
-                        <Slider
-                            defaultValue={1}
-                            aria-label="Default"
-                            justifyContent="center"
-                            step={0.1}
-                            min={1.0}
-                            max={5.0}
-                            valueLabelDisplay="auto"
-                        />
-                        <Box justifyContent={"center"}><Button variant="outlined" size="medium">Start Search</Button></Box>
-                    </Box>
             <Container sx={{ py: 1 }} maxWidth="md">
                 {/* End hero unit */}
                 <Grid container spacing={0}>
@@ -385,6 +376,7 @@ function Copyright() {
 
 //Master Export
 export default function decider(props) {
+    let parent = props.location.state
     return (
         <Fragment>
             <ThemeProvider theme={theme}>
@@ -412,7 +404,7 @@ export default function decider(props) {
                             </Typography>
                         </Container>
                     </Box>
-                    <SimpleMap/>
+                    <SimpleMap {...parent}/>
                 </main>
                 {/* Footer */}
                 <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
