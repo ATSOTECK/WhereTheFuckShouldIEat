@@ -244,6 +244,13 @@ class UserController {
         const uID = await this.getUserID(toAdd.username);
         const rID = await RestaurantController.getRestaurantID(toAdd.place_id);
         
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+
+        today = yyyy + '-' + mm + '-' + dd;
+        
         console.log(`uID ${uID} : rID ${rID}`);
         
         return new Promise(async (resolve, reject) => {
@@ -260,11 +267,11 @@ class UserController {
             }
             
             console.log('Adding to user history.');
-            const query = `INSERT INTO UserHistory (userID, restaurantID) VALUES (?, ?)`;
+            const query = `INSERT INTO UserHistory (userID, restaurantID, dateAdded) VALUES (?, ?, ?)`;
             
             dbConnection.query({
                 sql: query,
-                values: [uID, rID]
+                values: [uID, rID, today]
             }, async (error, res) => {
                 try {
                     if (error) {

@@ -11,6 +11,8 @@ CREATE TABLE Restaurant (
     #category VARCHAR (32) NOT NULL,
     lat DOUBLE PRECISION (16, 12) NOT NULL DEFAULT 0,
     lng DOUBLE PRECISION (16, 12) NOT NULL DEFAULT 0,
+    photoRef VARCHAR (256) NOT NULL,
+    address VARCHAR (128) NOT NULL,
     updated DATE,
     
     #Maybe not the best way to do it.

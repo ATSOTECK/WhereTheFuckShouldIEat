@@ -347,7 +347,9 @@ class Newpop extends React.Component {
                 place_id: restaurant.place_id,
                 name: restaurant.name,
                 lat: restaurant.geometry.location.lat,
-                lng: restaurant.geometry.location.lng
+                lng: restaurant.geometry.location.lng,
+                photoRef: restaurant.photos[0].photo_reference,
+                address: restaurant.vicinity
             })
         }).then(async (response) => {
             console.log(response);
@@ -379,15 +381,11 @@ class Newpop extends React.Component {
                 throw new Error(`Unexpected response: ${response}`);
             }
         });
-        
+        /*
         let list = await fetch(`http://localhost:25566/api/user/history/${username}`)
         .then((response) => response.json())
         .then((data) => {return data});
         console.log("list", list);
-        /*
-        list.map((item) => {
-            console.log(item);
-        });
         */
     }
 

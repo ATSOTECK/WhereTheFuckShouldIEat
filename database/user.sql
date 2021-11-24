@@ -20,6 +20,7 @@ ALTER TABLE User AUTO_INCREMENT = 1000;
 CREATE TABLE UserHistory (
     userID INT NOT NULL,
     restaurantID INT NOT NULL,
+    dateAdded DATE NOT NULL,
     
     CONSTRAINT fkUserID FOREIGN KEY (userID)
         REFERENCES User (id)

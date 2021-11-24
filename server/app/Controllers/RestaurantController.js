@@ -40,13 +40,13 @@ class RestaurantController {
                         //Add the restaurant if it doen't exist.
                         const query = `
                             INSERT INTO Restaurant
-                            (place_id, name, lat, lng) VALUES
-                            (?, ?, ?, ?)
+                            (place_id, name, lat, lng, photoRef, address) VALUES
+                            (?, ?, ?, ?, ?, ?)
                         `;
                         
                         dbQuery({
                             sql: query,
-                            values: [restaurant.place_id, restaurant.name, restaurant.lat, restaurant.lng]
+                            values: [restaurant.place_id, restaurant.name, restaurant.lat, restaurant.lng, restaurant.photoRef, restaurant.address]
                         }, (err, res) => {
                             try {
                                 if (err) {
@@ -101,7 +101,7 @@ class RestaurantController {
     async getRestaurantByID(rID) {
         console.log(`Getting restaurant for ${rID}`);
         return new Promise((resolve, reject) => {
-            const query = `SELECT place_id, name, lat, lng FROM Restaurant WHERE id = ?`;
+            const query = `SELECT place_id, name, lat, lng, photoRef, address FROM Restaurant WHERE id = ?`;
             
             dbConnection.query({
                 sql: query,
