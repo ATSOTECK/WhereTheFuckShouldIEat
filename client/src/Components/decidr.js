@@ -1,4 +1,4 @@
-import React, {Fragment, Component} from 'react';
+import React, {Fragment, Component, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -16,6 +16,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
+import ReactHtmlParser from 'react-html-parser';
 
 import{useContext} from 'react';
 import AuthContext from './authContext';
@@ -46,9 +47,13 @@ function IHateReact() {
 
 //MAP FUNCTION
 class SimpleMap extends Component {
+    constructor(props) {
+        super(props);
+        //console.log("radius in meters = ", props["value"] * 1609)
+    }
 
     state = {
-        nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
+        nImg: "https://flevix.com/wp-content/uploads/2019/07/Untitled-2.gif",
         cardName: "Finding Restaurants!",
         addressName: "Address will appear here!",
         oldNums: [],
@@ -59,7 +64,9 @@ class SimpleMap extends Component {
         color: "",
         zoom: 13,
         pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
-        refresh:0
+        refresh: 0,
+        directions: [],
+        radius: 1609
     };
 
     componentDidMount() {
@@ -74,11 +81,15 @@ class SimpleMap extends Component {
                 center: newLat
             });
             console.log("Current Location:\n", newLat)
-            let radius = 1999;
+            
+            if (this.props["value"] !== 'undefined') {
+                this.setState({radius: this.props["value"]*1609})
+            }
+            console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius)
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant";
+            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant&keyword=cruise&key=";
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -142,6 +153,11 @@ class SimpleMap extends Component {
 
     //ALL CARD SETTINGS NOW
     async resetCard() {
+        this.setState({
+            nImg: "https://flevix.com/wp-content/uploads/2019/07/Untitled-2.gif",
+            cardName: "Grabbing Fresh Restaurant",
+            addressName: "One Moment Please"
+        })
         if (loc.length > 0) {
             num = this.getRandomInt(loc.length)
             let newImg = await this.getImg(num)
@@ -215,7 +231,7 @@ class SimpleMap extends Component {
 
     render() {
         return (
-            <Box padding={'0px'} justifyContent={"center"}>
+            <Box padding={'0px'} justifyContent="center">
             <Container sx={{ py: 1 }} maxWidth="md">
                 {/* End hero unit */}
                 <Grid container spacing={0}>
@@ -229,7 +245,7 @@ class SimpleMap extends Component {
                                     sx={{
                                         pt: '%',
                                     }}
-                                    style={{height: 600,
+                                    style={{height: 700,
                                         width:900}}
                                     image={this.state.nImg}
                                 />
@@ -260,7 +276,7 @@ class SimpleMap extends Component {
                     <Typography gutterBottom variant="h5" component="h2" align="center">
                         Here's your location in red and the restaurants in blue!
                     </Typography>
-                    <div id="gmap_canvas" style={{ height: '44vh', width: '55%',
+                    <div id="gmap_canvas" style={{ height: '50vh', width: '55%',
                         marginLeft:"auto", marginRight:"auto" }}>
                         <GoogleMapReact
                             yesIWantToUseGoogleMapApiInternals={true}
@@ -313,11 +329,12 @@ class Newpop extends React.Component {
         this.state={
             show:false,
             name: "",
-            directions: []
+            directions: [],
+            directionsWord: []
         }
     }
     async getDirections() {
-        let x;
+        let x = [];
         if (num === -1) {
             return
         }
@@ -325,9 +342,13 @@ class Newpop extends React.Component {
         const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'];
         console.log(reqStr)
         //Using old CORS
-        await fetch (reqStr)
+        await fetch(reqStr)
             .then(r => r.json())
-            .then(data => console.log(data['routes'][0]['legs'][0]['steps']));
+            .then(data => (x = data['routes'][0]['legs'][0]['steps']))
+            //.then(data => console.log(x))
+            .then(data => this.setState({ directions: x}))
+            .then(data => console.log(this.state.directions))
+            //.then(data => this.setDir(x))
         //console.log("d:", this.state.directions)
     }
     
@@ -389,11 +410,13 @@ class Newpop extends React.Component {
         */
     }
 
-
     handleModal() {
-        this.setState({show:!this.state.show});
-        //this.getDirections();
-        this.addToHistory();
+        this.setState({show:!this.state.show})
+        if (!this.state.show) {
+            this.getDirections()
+        } else {
+            this.setState({directions: []})
+        }
     }
     render() {
         return (
@@ -405,7 +428,12 @@ class Newpop extends React.Component {
                         Directions to: {this.props.name}
                     </ModalHeader>
                     <ModalBody>
-                        {this.state.directions}
+                        {this.state.directions.map(item =>
+                                <Box padding={'10px'}>
+                                    {ReactHtmlParser(item["html_instructions"] + " in " + item['distance']['text'])}
+                                </Box>
+                            // + this.state.directionsWord[item] + this.state.directions[item]['distance']['text']
+                        )}
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>
@@ -432,6 +460,7 @@ function Copyright() {
 
 //Master Export
 export default function decider(props) {
+    let parent = props.location.state
     return (
         <Fragment>
             <ThemeProvider theme={theme}>
@@ -459,7 +488,7 @@ export default function decider(props) {
                             </Typography>
                         </Container>
                     </Box>
-                    <SimpleMap/>
+                    <SimpleMap {...parent}/>
                 </main>
                 {/* Footer */}
                 <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
