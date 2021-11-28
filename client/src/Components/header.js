@@ -33,7 +33,7 @@ function Header() {
                                 User Settings
                             </Button>
                         </Box> :
-                        <Typography></Typography>
+                        <Typography/>
                     }
                     {
                         auth.user ?

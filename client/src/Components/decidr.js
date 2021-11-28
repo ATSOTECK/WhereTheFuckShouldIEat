@@ -1,4 +1,4 @@
-import React, {Fragment, Component, useState } from 'react';
+import React, {Fragment, Component} from 'react';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -7,7 +7,6 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
@@ -17,8 +16,6 @@ import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
 import ReactHtmlParser from 'react-html-parser';
-
-
 
 const cards = [1];
 const theme = createTheme();
@@ -56,6 +53,7 @@ class SimpleMap extends Component {
         zoom: 13,
         pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
         refresh: 0,
+        keywords: "",
         directions: [],
         radius: 1609
     };
@@ -76,11 +74,29 @@ class SimpleMap extends Component {
             if (this.props["value"] !== 'undefined') {
                 this.setState({radius: this.props["value"]*1609})
             }
+            let keyword = ""
+            if(this.props["vegan"]){
+                keyword = keyword + "vegan,"
+            }
+            if(this.props["vegetarian"]){
+                keyword += "vegetarian,"
+            }
+            if(this.props["glutenFree"]){
+                keyword+= "gluten,"
+            }
+            if(keyword.length > 1){
+                keyword = keyword.slice(0, -1)
+            }
+            this.setState({
+                keywords: keyword
+            })
             console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius)
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant&keyword=cruise&key=" + key
+            //console.log(this.state.keywords)
+            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant" + "&keyword=" + this.state.keywords + "&key=" + key
+            console.log(reqStr)
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -139,7 +155,7 @@ class SimpleMap extends Component {
             if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
                 newImg = URL.createObjectURL(newImg)
             }
-            
+
             let newState = {
                 nImg: newImg,
                 name: loc[num]['name'],
@@ -207,46 +223,44 @@ class SimpleMap extends Component {
     render() {
         return (
             <Box padding={'0px'} justifyContent="center">
-            <Container sx={{ py: 1 }} maxWidth="md">
-                {/* End hero unit */}
-                <Grid container spacing={0}>
-                    {cards.map((card) => (
-                        <Grid item key={card} md={12} justifyContent="center">
-                            <Card
-                                sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-                            >
-                                <CardMedia
-                                    component="img"
-                                    sx={{
-                                        pt: '%',
-                                    }}
-                                    style={{height: 700,
-                                        width:900}}
-                                    image={this.state.nImg}
-                                />
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Typography gutterBottom variant="h5" component="h2" align="center">
-                                        {this.state.cardName}
-                                    </Typography>
-                                    <Typography>
-                                        {this.state.addressName}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Box justifyContent={"center"} marginLeft={'200px'}>
-                                        <Newpop
-                                            name={this.state.cardName}
-                                        />
-                                    </Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Favorite</Button></Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Blacklist</Button></Box>
-                                    <Box justifyContent={"center"}><Button onClick={() => {this.resetCard()}} variant="outlined" size='medium'>Refresh</Button></Box>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            </Container>
+                <Container sx={{ py: 1 }} maxWidth="md">
+                    {/* End hero unit */}
+                    <Grid container spacing={0}>
+                        {cards.map((card) => (
+                            <Grid item key={card} md={12} justifyContent="center">
+                                <Card
+                                    sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                                >
+                                    <CardMedia
+                                        component="img"
+                                        sx={{
+                                            pt: '%',
+                                        }}
+                                        style={{height: 700,
+                                            width:900}}
+                                        image={this.state.nImg}
+                                    />
+                                    <CardContent sx={{ flexGrow: 1 }}>
+                                        <Typography gutterBottom variant="h5" component="h2" align="center">
+                                            {this.state.cardName}
+                                        </Typography>
+                                        <Typography>
+                                            {this.state.addressName}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions>
+                                        <Box justifyContent={"center"} marginLeft={"285px"} marginRight={"50px"}>
+                                            <Newpop
+                                                name={this.state.cardName}
+                                            />
+                                        </Box>
+                                        <Box justifyContent={"center"}><Button onClick={() => {this.resetCard()}} variant="outlined" size='medium'>Refresh</Button></Box>
+                                    </CardActions>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Container>
                 <Box padding={"50px"}>
                     <Typography gutterBottom variant="h5" component="h2" align="center">
                         Here's your location in red and the restaurants in blue!
@@ -323,7 +337,7 @@ class Newpop extends React.Component {
             //.then(data => console.log(x))
             .then(data => this.setState({ directions: x}))
             .then(data => console.log(this.state.directions))
-            //.then(data => this.setDir(x))
+        //.then(data => this.setDir(x))
     }
 
     handleModal() {
@@ -377,6 +391,7 @@ function Copyright() {
 //Master Export
 export default function decider(props) {
     let parent = props.location.state
+    let keywords = props.location.keyword
     return (
         <Fragment>
             <ThemeProvider theme={theme}>
@@ -400,11 +415,11 @@ export default function decider(props) {
                                 Welcome to Decidr!
                             </Typography>
                             <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                               Click refresh on the restaurant card and you'll get your restaurant
+                                Click refresh on the restaurant card and you'll get your restaurant
                             </Typography>
                         </Container>
                     </Box>
-                    <SimpleMap {...parent}/>
+                    <SimpleMap {...parent}{...keywords}/>
                 </main>
                 {/* Footer */}
                 <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">

@@ -9,9 +9,8 @@ import Header from './Components/header.js'
 import User from './Components/User'
 import jwt_decode from 'jwt-decode';
 
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
-import { LocalLaundryService } from '@mui/icons-material';
 
 import AuthContext from './Components/authContext';
 
