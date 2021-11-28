@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, useState} from 'react';
 import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
@@ -7,16 +7,39 @@ import Slider from '@mui/material/Slider';
 import MuiInput from '@mui/material/Input';
 import { styled } from '@mui/material/styles';
 import { Link } from 'react-router-dom'
-
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 const Input = styled(MuiInput)`
   width: 42px;
 `;
 
+let vegan = false
+let vegetarian = false
+let glutenFree = false
 export default function Home(props) {
+    let keywords = ""
+    const [veganChecked, setVeganChecked] = useState(false)
+
+    const veganChange = (event => {
+        setVeganChecked(event.target.checked)
+        changeKeyword(0)
+    })
+    const [vegetarianChecked, setVegetarianChecked] = useState(false)
+
+    const vegetarianChange = (event => {
+        setVegetarianChecked(event.target.checked)
+        changeKeyword(1)
+    })
+    const [glutenChecked, setGlutenChecked] = useState(false)
+
+    const glutenChange = (event => {
+        setGlutenChecked(event.target.checked)
+        changeKeyword(2)
+    })
+
 
     const [value, setValue] = React.useState(1);
-
     const handleSliderChange = (event, newValue) => {
       setValue(newValue);
     };
@@ -33,8 +56,17 @@ export default function Home(props) {
           setValue(3);
         }
     };
-  
 
+    function changeKeyword(box) {
+        if(box === 0){ //vegan
+            vegan = !vegan
+        } else if(box === 1){ //veggies :)
+            vegetarian = !vegetarian
+        } else if(box === 2){ // Gluten Free
+            glutenFree = !glutenFree
+        }
+
+    }
 
     return (
         <Fragment>
@@ -97,7 +129,8 @@ export default function Home(props) {
                     </Box>
                     <Link to={{
                     pathname: "/decidr",
-                    state: {value}
+                    state: {value},
+                    keyword: {vegan,vegetarian,glutenFree}
                     }}>
                         <Box padding={"10px"} alignItems="center" marginLeft="auto" marginRight="auto" width={500} justifyContent="center">
                             <Button type={"submit"} formTarget="_self" href={'/#/decidr'} variant='outlined' size={"large"}>
@@ -107,7 +140,8 @@ export default function Home(props) {
                     </Link>
                     <Link to={{
                     pathname: "/rbl",
-                    state: {value}
+                    state: {value},
+                    keyword: {vegan,vegetarian,glutenFree}
                     }}>
                         <Box padding={"10px"} alignItems="center" marginLeft="auto" marginRight="auto" width={500} justifyContent="center">
                             <Button type={"submit"} formTarget="_self" href={'/#/rbl'} variant='outlined' size={"large"}>
@@ -115,6 +149,21 @@ export default function Home(props) {
                             </Button>
                         </Box>
                     </Link>
+                <FormControlLabel control={    <Checkbox
+                    checked={veganChecked}
+                    onChange={veganChange}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                />} label="Vegan" />
+                <FormControlLabel control={    <Checkbox
+                    checked={vegetarianChecked}
+                    onChange={vegetarianChange}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                />} label="Vegetarian" />
+                <FormControlLabel control={    <Checkbox
+                    checked={glutenChecked}
+                    onChange={glutenChange}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                />} label="Gluten Free" />
             </Box>
         </Fragment>
     )

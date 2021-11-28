@@ -21,6 +21,7 @@ CREATE TABLE UserHistory (
     userID INT NOT NULL,
     restaurantID INT NOT NULL,
     dateAdded DATE NOT NULL,
+    isFave BOOLEAN NOT NULL,
     
     CONSTRAINT fkUserID FOREIGN KEY (userID)
         REFERENCES User (id)

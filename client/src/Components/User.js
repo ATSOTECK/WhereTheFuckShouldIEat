@@ -12,6 +12,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import ModalHeader from "react-bootstrap/ModalHeader";
+import ReactHtmlParser from 'react-html-parser';
 
 import { Link } from 'react-router-dom';
 
@@ -56,17 +57,55 @@ class HistoryCards extends Component {
                 key: 0
             }],
             click: 0,
-            show: false
+            show: false,
+            directions: []
         };
     }
 
-    getDirections() {
-
+    async getDirections(num) {
+        let x = [];
+        if (num === -1) {
+            return
+        }
+        
+        const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[num].lat + "," + loc[num].lng;
+        await fetch(reqStr)
+            .then(r => r.json())
+            .then(data => (x = data['routes'][0]['legs'][0]['steps']))
+            //.then(data => console.log(x))
+            .then(data => this.setState({ directions: x}))
+            .then(data => console.log(this.state.directions))
+            //.then(data => this.setDir(x))
+    }
+    
+    setDir(x) {
+        let dir = []
+        console.log(x)
+        for (let i in x) {
+            console.log(x[i]['maneuver'])
+            switch (x[i]['maneuver']) {
+                case('undefined'):
+                    dir.push(" for ")
+                    break;
+                default: {
+                    dir.push(" in ")
+                }
+            }
+        }
+        this.setState({
+            directions: x,
+            directionsWord: dir
+        })
+        console.log("d", this.state.directions)
     }
 
     handleModal(n) {
         this.setState({show:!this.state.show, click: n})
-        //this.getDirections()
+        if (!this.state.show) {
+            this.getDirections(n)
+        } else {
+            this.setState({directions: []})
+        }
     }
 
     async componentDidMount() {
@@ -192,10 +231,15 @@ class HistoryCards extends Component {
                                                     {/*POPUP*/}
                                                     <Modal show={this.state.show}>
                                                         <ModalHeader>
-                                                            Directions:
+                                                            Directions to: {this.state.cardValues[this.state.click].name}
                                                         </ModalHeader>
                                                         <ModalBody>
-                                                            {this.state.cardValues[this.state.click].name}
+                                                            {this.state.directions.map(item =>
+                                                                    <Box padding={'10px'}>
+                                                                        {ReactHtmlParser(item["html_instructions"] + " in " + item['distance']['text'])}
+                                                                    </Box>
+                                                                // + this.state.directionsWord[item] + this.state.directions[item]['distance']['text']
+                                                            )}
                                                         </ModalBody>
                                                         <ModalFooter>
                                                             <Button onClick={() => {this.handleModal(this.state.click)}} variant="outlined" size="medium">Close</Button>

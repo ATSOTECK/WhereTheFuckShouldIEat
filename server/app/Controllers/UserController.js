@@ -238,6 +238,10 @@ class UserController {
     }
     
     async addToHistory(ctx, toAdd) {
+        if (!(toAdd.place_id && toAdd.username)) {
+            return;
+        }
+        
         console.log(`Adding ${toAdd.place_id} to ${toAdd.username}'s history.`);
         
         //Assume the user and restaurant exist.

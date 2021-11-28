@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, {useState, Component, Fragment} from 'react';
 import Typography from '@mui/material/Typography';
 import GoogleMapReact from "google-map-react";
 import './Marker.css';
@@ -39,20 +39,57 @@ function pinHandler(jsonArray,ctx) {
 }
 
 class Marker extends Component {
-
+    constructor(props) {
+        super(props);
+        this.handleClick = this.handleClick.bind(this);
+    }
+    
     state = {
         name: "test",
         color: "blue",
         id: ""
     }
+    
+    handleClick(){
+        console.log("")
+    }
+    
     render() {
+        const PopUp = ({ idMessage }) => {
+            // create state `open` with default as false
+            const [open, setOpen] = useState(false);
+            const divstyle = {
+                color: 'red',
+            }
+            return (
+
+                <>
+                    {open && (
+
+                        <div style={divstyle}>
+                            <p>
+                                <br/>
+                                {this.props.name}
+                            </p>
+                        </div>
+                    )}
+                    <div>
+                        <div className="marker"
+                             style={{ backgroundColor: this.props.color, cursor: 'pointer'}}
+                             title={this.props.name}
+                             data-toggle="modal"
+                             onClick={() => setOpen(!open)}
+                        />
+                        <div className="pulse" />
+
+                    </div>
+
+                </>
+            );
+        };
         return (
             <div>
-                <div className="marker"
-                    style={{ backgroundColor: this.props.color, cursor: 'pointer'}}
-                     title={this.props.name}
-                />
-                <div className="pulse" />
+                <PopUp idMessage={this.props.name}></PopUp>
             </div>
         );
     }
@@ -77,6 +114,7 @@ class SimpleMap extends Component {
 
     constructor(props) {
         super(props);
+        console.log(props)
         this.state = {
             center: {
                 lat,
@@ -92,6 +130,7 @@ class SimpleMap extends Component {
                 key: 0
             }],
             click: 0,
+            keywords: "",
             show: false,
             directions: [],
             radius: 1609
@@ -103,16 +142,69 @@ class SimpleMap extends Component {
         if (loc.length <= 0) {
             return
         }
-        //OLD CORS
-        //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[this.state.click]["geometry"]["location"]['lat'] + "," + loc[this.state.click]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        //console.log(reqStr)
+        
+        const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[this.state.click]["geometry"]["location"]['lat'] + "," + loc[this.state.click]["geometry"]["location"]['lng'];
         await fetch(reqStr)
             .then(r => r.json())
             .then(data => (x = data['routes'][0]['legs'][0]['steps']))
             //.then(data => console.log(x))
             .then(data => this.setState({ directions: x}))
             .then(data => console.log(this.state.directions))
+    }
+    
+    async addToHistory(restaurant) {
+        const username = document.cookie.split('=')[1];
+        console.log(`Add to hist ${username} : ${restaurant.place_id}`);
+        
+        console.log(restaurant);
+        
+        if (!restaurant.photos[0].photo_reference) {
+            restaurant.photos[0].photo_reference = '';
+        }
+        
+        await fetch(`http://localhost:25566/api/restaurant/new/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                place_id: restaurant.place_id,
+                name: restaurant.name,
+                lat: restaurant.geometry.location.lat,
+                lng: restaurant.geometry.location.lng,
+                photoRef: restaurant.photos[0].photo_reference,
+                address: restaurant.vicinity
+            })
+        }).then(async (response) => {
+            console.log(response);
+            if (response.status === 200) {
+                console.log(response.json());
+            } else if (response.status === 409) {
+                console.log('Restaurant already existed.');
+            } else {
+                throw new Error(`Unexpected response: ${response}`);
+            }
+        });
+        
+        await fetch(`http://localhost:25566/api/user/addToHistory/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                place_id: restaurant.place_id
+            })
+        }).then(async (response) => {
+            console.log(response);
+            if (response.status === 200 || response.status === 404) {
+                console.log(response.json());
+            } else if (response.status === 409) {
+                console.log('Restaurant already in user history.');
+            } else {
+                throw new Error(`Unexpected response: ${response}`);
+            }
+        });
     }
 
     handleModal(n) {
@@ -122,6 +214,8 @@ class SimpleMap extends Component {
         } else {
             this.setState({directions: []})
         }
+        
+        this.addToHistory(loc[n]);
     }
 
     componentDidMount() {
@@ -140,11 +234,34 @@ class SimpleMap extends Component {
             if (this.props["value"] !== 'undefined') {
                 this.setState({radius: this.props["value"]*1609});
             }
-            console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius);
+            let keyword = ""
+            if(this.props["vegan"]){
+                keyword = keyword + "vegan,"
+            }
+            if(this.props["vegetarian"]){
+                keyword += "vegetarian,"
+            }
+            if(this.props["glutenFree"]){
+                keyword+= "gluten,"
+            }
+            if(keyword.length > 1){
+                keyword = keyword.slice(0, -1)
+            }
+            this.setState({
+                keywords: keyword
+            })
+            console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius, "keywords used:", this.state.keywords);
             let res;
+            if (!this.state.radius) {
+                this.state.radius = 1609; //default radius
+            }
             //old COR
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
-            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant";
+            let reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant";
+            
+            if (this.state.keywords) {
+                reqStr += "&keyword=" + this.state.keywords;
+            } 
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -160,6 +277,7 @@ class SimpleMap extends Component {
     async addCards() {
         let newCards = this.state.cards
         let newVals = this.state.cardValues
+        let removed = false;
         if (loc.length === 0) {
             newVals[0].name = "No restaurants in your area"
             this.setState({
@@ -169,10 +287,11 @@ class SimpleMap extends Component {
         }
         newVals.pop()
         for (let i in loc) {
+            console.log('this is i', i);
             //set to 3 places max for demonstration purposes
-           /* if (i >= 3) {
+            /*if (i >= 3) {
                 break;
-            } */
+            }*/
             newCards.push(this.state.cards.length)
             let newImg = await this.getImg(i)
             if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
@@ -184,12 +303,25 @@ class SimpleMap extends Component {
                 address: loc[i]['vicinity'],
                 key: newCards.length
             })
+            
+            if (!removed) {
+                newCards.shift();
+                removed = true;
+            }
+            
+            this.setState({
+                cards: newCards,
+                cardValues: newVals
+            })
+            
+            console.log('this is i done', i);
         }
+        /*
         newCards.shift()
         this.setState({
             cards: newCards,
             cardValues: newVals
-        })
+        })*/
         console.log("Current State:", this.state)
     }
 

@@ -65,6 +65,7 @@ class SimpleMap extends Component {
         zoom: 13,
         pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
         refresh: 0,
+        keywords: "",
         directions: [],
         radius: 1609
     };
@@ -85,11 +86,38 @@ class SimpleMap extends Component {
             if (this.props["value"] !== 'undefined') {
                 this.setState({radius: this.props["value"]*1609})
             }
+            let keyword = ""
+            if(this.props["vegan"]){
+                keyword = keyword + "vegan,"
+            }
+            if(this.props["vegetarian"]){
+                keyword += "vegetarian,"
+            }
+            if(this.props["glutenFree"]){
+                keyword+= "gluten,"
+            }
+            if(keyword.length > 1){
+                keyword = keyword.slice(0, -1)
+            }
+            this.setState({
+                keywords: keyword
+            })
             console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius)
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant";
+            if (!this.state.radius) {
+                this.state.radius = 1609; //default radius
+            }
+            
+            let reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant";
+            
+            if (this.state.keywords) {
+                reqStr += "&keyword=" + this.state.keywords;
+            }
+            
+            console.log(reqStr);
+            
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
@@ -258,13 +286,11 @@ class SimpleMap extends Component {
                                     </Typography>
                                 </CardContent>
                                 <CardActions>
-                                    <Box justifyContent={"center"} marginLeft={'200px'}>
+                                    <Box justifyContent={"center"} marginLeft={'285px'} marginRight={"50px"}>
                                         <Newpop
                                             name={this.state.cardName}
                                         />
                                     </Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Favorite</Button></Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Blacklist</Button></Box>
                                     <Box justifyContent={"center"}><Button onClick={() => {this.resetCard()}} variant="outlined" size='medium'>Refresh</Button></Box>
                                 </CardActions>
                             </Card>
@@ -340,7 +366,6 @@ class Newpop extends React.Component {
         }
         //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
         const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'];
-        console.log(reqStr)
         //Using old CORS
         await fetch(reqStr)
             .then(r => r.json())
@@ -348,8 +373,29 @@ class Newpop extends React.Component {
             //.then(data => console.log(x))
             .then(data => this.setState({ directions: x}))
             .then(data => console.log(this.state.directions))
-            //.then(data => this.setDir(x))
+            .then(data => this.setDir(x))
         //console.log("d:", this.state.directions)
+    }
+    
+    setDir(x) {
+        let dir = []
+        console.log(x)
+        for (let i in x) {
+            console.log(x[i]['maneuver'])
+            switch (x[i]['maneuver']) {
+                case('undefined'):
+                    dir.push(" for ")
+                    break;
+                default: {
+                    dir.push(" in ")
+                }
+            }
+        }
+        this.setState({
+            directions: x,
+            directionsWord: dir
+        })
+        console.log("d", this.state.directions)
     }
     
     async addToHistory() {
@@ -358,6 +404,10 @@ class Newpop extends React.Component {
         console.log(`Add to hist ${username} : ${restaurant.place_id}`);
         
         console.log(loc[num]);
+        
+        if (!restaurant.photos[0].photo_reference) {
+            restaurant.photos[0].photo_reference = '';
+        }
         
         await fetch(`http://localhost:25566/api/restaurant/new/`, {
             method: 'POST',
@@ -417,6 +467,8 @@ class Newpop extends React.Component {
         } else {
             this.setState({directions: []})
         }
+        
+        this.addToHistory();
     }
     render() {
         return (
@@ -460,7 +512,8 @@ function Copyright() {
 
 //Master Export
 export default function decider(props) {
-    let parent = props.location.state
+    let parent = props.location.state;
+    let keywords = props.location.keyword;
     return (
         <Fragment>
             <ThemeProvider theme={theme}>
@@ -488,7 +541,7 @@ export default function decider(props) {
                             </Typography>
                         </Container>
                     </Box>
-                    <SimpleMap {...parent}/>
+                    <SimpleMap {...parent}{...keywords}/>
                 </main>
                 {/* Footer */}
                 <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
