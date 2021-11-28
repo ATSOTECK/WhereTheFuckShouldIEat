@@ -41,7 +41,7 @@ class SimpleMap extends Component {
     }
 
     state = {
-        nImg: "https://flevix.com/wp-content/uploads/2019/07/Untitled-2.gif",
+        nImg: "https://c.tenor.com/kxZxwvPdm-wAAAAC/loading-loading-screen.gif",
         cardName: "Finding Restaurants!",
         addressName: "Address will appear here!",
         oldNums: [],
@@ -145,7 +145,7 @@ class SimpleMap extends Component {
     //ALL CARD SETTINGS NOW
     async resetCard() {
         this.setState({
-            nImg: "https://flevix.com/wp-content/uploads/2019/07/Untitled-2.gif",
+            nImg: "https://c.tenor.com/kxZxwvPdm-wAAAAC/loading-loading-screen.gif",
             cardName: "Grabbing Fresh Restaurant",
             addressName: "One Moment Please"
         })
