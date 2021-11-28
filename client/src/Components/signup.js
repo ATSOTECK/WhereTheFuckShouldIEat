@@ -43,15 +43,16 @@ export default function SignUp() {
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
     
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, '0');
+    let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    let yyyy = today.getFullYear();
 
     today = yyyy + '-' + mm + '-' + dd;
     
     event.preventDefault();
-    fetch(`http://localhost:8443/api/user/new/`, {
+    //fetch(`http://108.194.253.176:25566/api/user/new/`, {
+    fetch(`http://localhost:25566/api/user/new/`, {
         method: 'POST',
         headers: {
             'Content-Type':'application/json'

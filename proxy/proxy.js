@@ -85,7 +85,9 @@ app.get('/directions/:url', (req, res) => {
                 return res.status(500).json({ type: 'error', message: "An unknown error occured." });
             }
         }
-    }).pipe(res);
+        
+        res.json(JSON.parse(body));
+    });
 });
 
 const PORT = process.env.PORT || 25565;

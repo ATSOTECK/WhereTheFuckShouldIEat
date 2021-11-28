@@ -6,6 +6,8 @@ const bcrypt = require('bcryptjs');
 
 const dbQuery = util.promisify(dbConnection.query).bind(dbConnection);
 
+const RestaurantController = new (require('./RestaurantController.js'))();
+
 function now() {
     return dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
 }
@@ -187,6 +189,151 @@ class UserController {
                 } catch (e) {
                     console.log(`Error: ${e}`);
                 }
+            });
+        });
+    }
+    
+    //Meant to be called internally by the server.
+    async getUserID(username) {
+        console.log(`Getting userID for ${username}`);
+        return new Promise((resolve, reject) => {
+            const query = `SELECT id FROM User WHERE username = ?`;
+            
+            dbConnection.query({
+                sql: query,
+                values: [username]
+            }, (error, tuples) => {
+                if (error) {
+                    console.log('Connection error in UserController::getUserID()', error);
+                    return reject(error);
+                }
+                
+                return resolve(tuples[0].id);
+            });
+        }).catch((err) => {
+            console.log('Database connection error', err);
+        });
+    }
+    
+    async checkIfInHistory(uID, rID) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM UserHistory WHERE userID = ? AND restaurantID = ?`;
+            
+            dbConnection.query({
+                sql: query,
+                values: [uID, rID]
+            }, (error, res) => {
+                if (error) {
+                    console.log(error);
+                    return reject(error);
+                }
+                
+                if (res[0]) {
+                    return resolve(true);
+                } else {
+                    return resolve(false);
+                }
+            });
+        });
+    }
+    
+    async addToHistory(ctx, toAdd) {
+        if (!(toAdd.place_id && toAdd.username)) {
+            return;
+        }
+        
+        console.log(`Adding ${toAdd.place_id} to ${toAdd.username}'s history.`);
+        
+        //Assume the user and restaurant exist.
+        const uID = await this.getUserID(toAdd.username);
+        const rID = await RestaurantController.getRestaurantID(toAdd.place_id);
+        
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+
+        today = yyyy + '-' + mm + '-' + dd;
+        
+        console.log(`uID ${uID} : rID ${rID}`);
+        
+        return new Promise(async (resolve, reject) => {
+            if (!(uID && rID)) {
+                return reject("Can't get uID or rID.");
+            }
+            
+            const exists = await this.checkIfInHistory(uID, rID);
+            if (exists === true) {
+                console.log("Already in the user history.");
+                ctx.status = 409;
+                ctx.body = [];
+                return resolve("Already in the user history.");
+            }
+            
+            console.log('Adding to user history.');
+            const query = `INSERT INTO UserHistory (userID, restaurantID, dateAdded) VALUES (?, ?, ?)`;
+            
+            dbConnection.query({
+                sql: query,
+                values: [uID, rID, today]
+            }, async (error, res) => {
+                try {
+                    if (error) {
+                        console.log('Connection error in UserController::addToHistory()', error);
+                        return reject(error);
+                    }
+                    
+                    ctx.status = 200;
+                    ctx.body = {
+                        status: "addToHistory success",
+                    };
+                    resolve(res);
+                } catch (e) {
+                    console.log(`Error: ${e}`);
+                }
+            });
+        });
+    }
+    
+    async getFromUserHistory(ctx) {
+        console.log(`Getting user history for ${ctx.params.username}`);
+        
+        const uID = await this.getUserID(ctx.params.username);
+        
+        return new Promise((resolve, reject) => {
+            if (!uID) {
+                return reject("Can't get uID.");
+            }
+            
+            const query = `SELECT * FROM UserHistory WHERE userID = ?`;
+            dbConnection.query({
+                sql: query,
+                values: [uID]
+            }, async (error, res) => {
+                if (error) {
+                    console.log('Connection error in UserController::getFromUserHistory()', error);
+                    return reject(error);
+                }
+                
+                let restaurants = await res.map(async (hist) => {
+                    return await RestaurantController.getRestaurantByID(hist.restaurantID).then((data) => {
+                        data = {
+                            dateAdded: hist.dateAdded,
+                            ...data
+                        }
+                        
+                        return data;
+                    });
+                });
+                
+                setTimeout(() => {
+                    ctx.status = 200;
+                    Promise.all(restaurants).then((values) => {
+                        ctx.body = values;
+                        return values;
+                    });
+                    resolve();
+                }, 10);
             });
         });
     }
