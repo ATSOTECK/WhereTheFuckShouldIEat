@@ -10,9 +10,12 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import ModalHeader from "react-bootstrap/ModalHeader";
 import ReactHtmlParser from 'react-html-parser';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import Stack from '@mui/material/Stack';
 
 import { Link } from 'react-router-dom';
 
@@ -106,6 +109,10 @@ class HistoryCards extends Component {
         } else {
             this.setState({directions: []})
         }
+    }
+    
+    setFavorite(n) {
+        console.log('fav', n);
     }
 
     async componentDidMount() {
@@ -228,6 +235,7 @@ class HistoryCards extends Component {
                                                 <div>
                                                     {/* eslint-disable-next-line no-restricted-globals */}
                                                     <Button id={card-1} onClick={() => {this.handleModal(event.target.id)}} variant="outlined" size="medium">Go again!</Button>
+                                                    <IconButton id={card-1} onClick={() => {this.setFavorite(this.state.click)}} aria-label="fav"><StarBorderIcon/></IconButton>
                                                     {/*POPUP*/}
                                                     <Modal show={this.state.show}>
                                                         <ModalHeader>
