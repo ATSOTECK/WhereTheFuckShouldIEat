@@ -125,7 +125,7 @@ class SimpleMap extends Component {
             cards: [1],
             cardValues: [{
                 name: "Finding Restaurants",
-                nImg: "https://flevix.com/wp-content/uploads/2019/07/Untitled-2.gif",
+                nImg: "https://c.tenor.com/kxZxwvPdm-wAAAAC/loading-loading-screen.gif",
                 address: "This will take a moment",
                 key: 0
             }],
