@@ -49,11 +49,26 @@ const userRouter = require('koa-router')({
 //userRouter.use(VerifyJWT);
 userRouter.get('/:uid', Authorize('admin'), UserController.getUserByID);
 userRouter.get('/get/:username', UserController.getUserByUsername); //TODO(Skyler): Proper auth.
+userRouter.get('/history/:username', async (ctx) => {
+    await UserController.getFromUserHistory(ctx);
+});
 userRouter.post('/new/', async ctx => {
     let newUser = ctx.request.body;
-    //console.log(newUser);
     await UserController.newUser(ctx, newUser);
 });
+userRouter.post('/addToHistory/', async ctx => {
+    let toAdd = ctx.request.body;
+    await UserController.addToHistory(ctx, toAdd);
+});
+
+const RestaurantController = new (require('../app/Controllers/RestaurantController.js'))();
+const restaurantRouter = require('koa-router')({
+    prefix: '/restaurant'
+});
+restaurantRouter.post('/new/', async ctx => {
+    let restaurant = ctx.request.body;
+    await RestaurantController.newRestaurant(ctx, restaurant);
+})
 
 /**
  * Register all of the controllers into the default controller.
@@ -61,7 +76,8 @@ userRouter.post('/new/', async ctx => {
 router.use(
     '',
     loginRouter.routes(),
-    userRouter.routes()
+    userRouter.routes(),
+    restaurantRouter.routes()
 );
 
 module.exports = function (app) {

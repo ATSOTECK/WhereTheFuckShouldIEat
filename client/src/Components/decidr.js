@@ -1,4 +1,4 @@
-import React, {Fragment, Component} from 'react';
+import React, {Fragment, Component, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -16,8 +16,11 @@ import 'bootstrap/dist/css/bootstrap.css';
 import {Modal, ModalBody, ModalFooter} from 'react-bootstrap'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ModalHeader from "react-bootstrap/ModalHeader";
+import ReactHtmlParser from 'react-html-parser';
 
-
+import{useContext} from 'react';
+import AuthContext from './authContext';
+let auth;
 
 const cards = [1];
 const theme = createTheme();
@@ -32,14 +35,25 @@ function getLoc(res) {
     if (loc === 'undefined') {
         loc.length = 0;
     }
-    console.log("list of locations:\n", loc)
+    console.log("list of locations:\n", loc);
+}
+
+function IHateReact() {
+    auth = useContext(AuthContext);
+    return (
+        <Fragment></Fragment>
+    );
 }
 
 //MAP FUNCTION
 class SimpleMap extends Component {
+    constructor(props) {
+        super(props);
+        //console.log("radius in meters = ", props["value"] * 1609)
+    }
 
     state = {
-        nImg: "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/",
+        nImg: "https://c.tenor.com/kxZxwvPdm-wAAAAC/loading-loading-screen.gif",
         cardName: "Finding Restaurants!",
         addressName: "Address will appear here!",
         oldNums: [],
@@ -50,7 +64,10 @@ class SimpleMap extends Component {
         color: "",
         zoom: 13,
         pins: [{name: 'My location',lat:lat,lng:lng,id:0}],
-        refresh:0
+        refresh: 0,
+        keywords: "",
+        directions: [],
+        radius: 1609
     };
 
     componentDidMount() {
@@ -59,24 +76,54 @@ class SimpleMap extends Component {
                 lat: location.coords.latitude,
                 lng: location.coords.longitude
             };
-            lat = location.coords.latitude
-            lng = location.coords.longitude
+            lat = location.coords.latitude;
+            lng = location.coords.longitude;
             this.setState({
                 center: newLat
-            })
+            });
             console.log("Current Location:\n", newLat)
-            let radius = 1999
-            let key = 'AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts'
+            
+            if (this.props["value"] !== 'undefined') {
+                this.setState({radius: this.props["value"]*1609})
+            }
+            let keyword = ""
+            if(this.props["vegan"]){
+                keyword = keyword + "vegan,"
+            }
+            if(this.props["vegetarian"]){
+                keyword += "vegetarian,"
+            }
+            if(this.props["glutenFree"]){
+                keyword+= "gluten,"
+            }
+            if(keyword.length > 1){
+                keyword = keyword.slice(0, -1)
+            }
+            this.setState({
+                keywords: keyword
+            })
+            console.log("new Rad: ", this.props["value"], "miles or in meters: ", this.state.radius)
             let res;
             //fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="  + location.coords.latitude  + "%2C" + location.coords.longitude + " &radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key)
             //With proxy
-            const reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + radius + "&type=restaurant&keyword=cruise&key=" + key;
+            if (!this.state.radius) {
+                this.state.radius = 1609; //default radius
+            }
+            
+            let reqStr = "http://108.194.253.176:25565/list/" + location.coords.latitude  + "%2C" + location.coords.longitude + "&radius=" + this.state.radius + "&type=restaurant";
+            
+            if (this.state.keywords) {
+                reqStr += "&keyword=" + this.state.keywords;
+            }
+            
+            console.log(reqStr);
+            
             fetch(reqStr)
                 .then(response => response.json())
                 .then(data => (res = data['results']))
                 .then(data => getLoc(res))
                 .then(data => this.setPins(loc))
-                .then(data => this.resetCard())
+                .then(data => this.resetCard());
         }.bind(this));
         // https://cors-anywhere.herokuapp.com/corsdemo you need to authorize this
     }
@@ -85,13 +132,13 @@ class SimpleMap extends Component {
     setPins(loc) {
         let p = this.state.pins
         if (p.length === 1) {
-            p.pop()
+            p.pop();
             p.push({
                 name: "My Location",
                 lat:lat,lng:lng,
                 id:this.state.pins.id + 1,
                 color: "red"
-            })
+            });
             if (loc.length > 0 && this.state.refresh > 0) {
                 p.push({
                     name: loc[num]['name'],
@@ -99,31 +146,53 @@ class SimpleMap extends Component {
                     lng: loc[num]["geometry"]["location"]['lng'],
                     id: this.state.pins.id + 1,
                     color: "blue"
-                })
+                });
             }
         } else if (p.length === 2) {
-            p.pop()
+            p.pop();
             p.push({
                 name: loc[num]['name'],
                 lat:loc[num]["geometry"]["location"]['lat'],
                 lng:loc[num]["geometry"]["location"]['lng'],
                 id:this.state.pins.id + 1,
                 color: "blue"
-            })
+            });
         }
         this.setState({
             pins: p
-        })
+        });
+    }
+
+    async getImg(num) {
+        let x
+        console.log(loc[num]['photos'])
+        if ((typeof loc[num]['photos']) === 'undefined') {
+            return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
+        }
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=800" + "&maxheight=800"
+        console.log(reqStr);
+        await fetch(reqStr)
+            .then(r => r.blob())
+            .then(r => (x = r));
+            
+        console.log(x);
+        return x
     }
 
     //ALL CARD SETTINGS NOW
     async resetCard() {
+        this.setState({
+            nImg: "https://c.tenor.com/kxZxwvPdm-wAAAAC/loading-loading-screen.gif",
+            cardName: "Grabbing Fresh Restaurant",
+            addressName: "One Moment Please"
+        })
         if (loc.length > 0) {
             num = this.getRandomInt(loc.length)
             let newImg = await this.getImg(num)
             if (newImg !== "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/") {
                 newImg = URL.createObjectURL(newImg)
             }
+            
             let newState = {
                 nImg: newImg,
                 name: loc[num]['name'],
@@ -179,7 +248,7 @@ class SimpleMap extends Component {
         if ((typeof loc[num]['photos']) === 'undefined') {
             return "https://www.mountaineers.org/activities/routes-and-places/default-route-place/activities-and-routes-places-default-image/"
         }
-        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
+        const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&maxwidth=900" + "&maxheight=1080"
         //Using old CORS
         //await fetch("https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/photo" +"?photoreference=" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=800" + "&maxheight=1080")
         await fetch (reqStr)
@@ -190,7 +259,7 @@ class SimpleMap extends Component {
 
     render() {
         return (
-            <Box padding={'0px'} justifyContent={"center"}>
+            <Box padding={'0px'} justifyContent="center">
             <Container sx={{ py: 1 }} maxWidth="md">
                 {/* End hero unit */}
                 <Grid container spacing={0}>
@@ -204,7 +273,7 @@ class SimpleMap extends Component {
                                     sx={{
                                         pt: '%',
                                     }}
-                                    style={{height: 600,
+                                    style={{height: 700,
                                         width:900}}
                                     image={this.state.nImg}
                                 />
@@ -217,13 +286,11 @@ class SimpleMap extends Component {
                                     </Typography>
                                 </CardContent>
                                 <CardActions>
-                                    <Box justifyContent={"center"} marginLeft={'200px'}>
+                                    <Box justifyContent={"center"} marginLeft={'285px'} marginRight={"50px"}>
                                         <Newpop
                                             name={this.state.cardName}
                                         />
                                     </Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Favorite</Button></Box>
-                                    <Box justifyContent={"center"}><Button variant="outlined" size="medium">Blacklist</Button></Box>
                                     <Box justifyContent={"center"}><Button onClick={() => {this.resetCard()}} variant="outlined" size='medium'>Refresh</Button></Box>
                                 </CardActions>
                             </Card>
@@ -235,11 +302,11 @@ class SimpleMap extends Component {
                     <Typography gutterBottom variant="h5" component="h2" align="center">
                         Here's your location in red and the restaurants in blue!
                     </Typography>
-                    <div id="gmap_canvas" style={{ height: '44vh', width: '55%',
+                    <div id="gmap_canvas" style={{ height: '50vh', width: '55%',
                         marginLeft:"auto", marginRight:"auto" }}>
                         <GoogleMapReact
                             yesIWantToUseGoogleMapApiInternals={true}
-                            bootstrapURLKeys={{ key:"AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" }}
+                            bootstrapURLKeys={{ key: process.env.REACT_APP_API_KEY }}
                             center={this.state.center}
                             defaultZoom={this.state.zoom}
                         >
@@ -288,31 +355,120 @@ class Newpop extends React.Component {
         this.state={
             show:false,
             name: "",
-            directions: []
+            directions: [],
+            directionsWord: []
         }
     }
     async getDirections() {
-        let x
+        let x = [];
         if (num === -1) {
             return
         }
-        //const reqStr = "http://108.194.253.176:25565/pics/" + loc[num]['photos'][0]['photo_reference'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts" + "&maxwidth=900" + "&maxheight=1080"
-        //https://maps.googleapis.com/maps/api/directions/json?origin=Boston,MA&destination=Concord,MA&waypoints=Charlestown,MA|via:Lexington,MA
         //const reqStr = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        const reqStr = "http://108.194.253.176:25565/directions/?origin=" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'] + "&key=AIzaSyC-BRpx6kbf36SeESOx7IqQnri7dnkQ8ts"
-        console.log(reqStr)
+        const reqStr = "http://108.194.253.176:25565/directions/" + lat + "," + lng + "&destination=" + loc[num]["geometry"]["location"]['lat'] + "," + loc[num]["geometry"]["location"]['lng'];
         //Using old CORS
-        await fetch (reqStr)
+        await fetch(reqStr)
             .then(r => r.json())
-            .then(data => console.log(data['routes'][0]['legs'][0]['steps']))
+            .then(data => (x = data['routes'][0]['legs'][0]['steps']))
+            //.then(data => console.log(x))
+            .then(data => this.setState({ directions: x}))
+            .then(data => console.log(this.state.directions))
+            .then(data => this.setDir(x))
         //console.log("d:", this.state.directions)
     }
-
-
+    
+    setDir(x) {
+        let dir = []
+        console.log(x)
+        for (let i in x) {
+            console.log(x[i]['maneuver'])
+            switch (x[i]['maneuver']) {
+                case('undefined'):
+                    dir.push(" for ")
+                    break;
+                default: {
+                    dir.push(" in ")
+                }
+            }
+        }
+        this.setState({
+            directions: x,
+            directionsWord: dir
+        })
+        console.log("d", this.state.directions)
+    }
+    
+    async addToHistory() {
+        const restaurant = loc[num];
+        const username = document.cookie.split('=')[1];
+        console.log(`Add to hist ${username} : ${restaurant.place_id}`);
+        
+        console.log(loc[num]);
+        
+        if (!restaurant.photos[0].photo_reference) {
+            restaurant.photos[0].photo_reference = '';
+        }
+        
+        await fetch(`http://localhost:25566/api/restaurant/new/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                place_id: restaurant.place_id,
+                name: restaurant.name,
+                lat: restaurant.geometry.location.lat,
+                lng: restaurant.geometry.location.lng,
+                photoRef: restaurant.photos[0].photo_reference,
+                address: restaurant.vicinity
+            })
+        }).then(async (response) => {
+            console.log(response);
+            if (response.status === 200) {
+                console.log(response.json());
+            } else if (response.status === 409) {
+                console.log('Restaurant already existed.');
+            } else {
+                throw new Error(`Unexpected response: ${response}`);
+            }
+        });
+        
+        await fetch(`http://localhost:25566/api/user/addToHistory/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                place_id: restaurant.place_id
+            })
+        }).then(async (response) => {
+            console.log(response);
+            if (response.status === 200 || response.status === 404) {
+                console.log(response.json());
+            } else if (response.status === 409) {
+                console.log('Restaurant already in user history.');
+            } else {
+                throw new Error(`Unexpected response: ${response}`);
+            }
+        });
+        /*
+        let list = await fetch(`http://localhost:25566/api/user/history/${username}`)
+        .then((response) => response.json())
+        .then((data) => {return data});
+        console.log("list", list);
+        */
+    }
 
     handleModal() {
         this.setState({show:!this.state.show})
-        this.getDirections()
+        if (!this.state.show) {
+            this.getDirections()
+        } else {
+            this.setState({directions: []})
+        }
+        
+        this.addToHistory();
     }
     render() {
         return (
@@ -324,7 +480,12 @@ class Newpop extends React.Component {
                         Directions to: {this.props.name}
                     </ModalHeader>
                     <ModalBody>
-                        {this.state.directions}
+                        {this.state.directions.map(item =>
+                                <Box padding={'10px'}>
+                                    {ReactHtmlParser(item["html_instructions"] + " in " + item['distance']['text'])}
+                                </Box>
+                            // + this.state.directionsWord[item] + this.state.directions[item]['distance']['text']
+                        )}
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => {this.handleModal()}} variant="outlined" size="medium">Close</Button>
@@ -351,13 +512,15 @@ function Copyright() {
 
 //Master Export
 export default function decider(props) {
+    let parent = props.location.state;
+    let keywords = props.location.keyword;
     return (
         <Fragment>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <main>
                     {/* Hero unit */}
-                    <Box
+                    <Box marginTop="24px"
                         sx={{
                             bgcolor: 'background.paper',
                             pt: 0,
@@ -378,7 +541,7 @@ export default function decider(props) {
                             </Typography>
                         </Container>
                     </Box>
-                    <SimpleMap/>
+                    <SimpleMap {...parent}{...keywords}/>
                 </main>
                 {/* Footer */}
                 <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
