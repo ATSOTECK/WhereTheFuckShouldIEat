@@ -1,1 +1,7 @@
-Copied from the project 2 we did but I deleted my code specific to the project.
+To run the server you first need to create a mySQL database using the databse schema in the databse folder. If you need to modify the mySQL connection code do that in database/mySQLconnect.js
+
+Once the database is running run the following code to run the server:
+
+npm install
+
+node server.js
