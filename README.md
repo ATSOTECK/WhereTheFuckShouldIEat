@@ -1,10 +1,13 @@
-# Where The Fuck Should I Eat
+# Where The ~~Fuck~~ Should I Eat
 CS470 Project - Working title.
 
 ---
+Authors: Skyler Burwell, Brent Dunbar, Spencer Brown
 
-The API key needs to be added to .env files for the Google API calls to work.
+Each section has it's own simplistic README to run this project,
 
-The client .env file should be REACT_APP_API_KEY=theAPIKey
+to run the client without the backend run:
+    npm install
+    npm start
 
-And the proxy .env file should be API_KEY=theAPIKey
+the proxy and server files are a bit more complex and their README's reflect that information.
